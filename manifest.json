@@ -1,0 +1,18 @@
+{
+  "name": "BiB — Browser inside Browser",
+  "short_name": "BiB",
+  "description": "A miniature browser simulation built with HTML5, CSS3, and vanilla JavaScript.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F5F5F7",
+  "theme_color": "#FFFFFF",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23F5F5F7'/><rect x='15' y='15' width='70' height='70' rx='14' fill='%23FFFFFF' stroke='%230071E3' stroke-width='4'/><circle cx='30' cy='30' r='3.5' fill='%23FF5F57'/><circle cx='40' cy='30' r='3.5' fill='%23FEBC2E'/><circle cx='50' cy='30' r='3.5' fill='%2328C840'/></svg>",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

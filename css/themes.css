@@ -1,407 +1,96 @@
-/* ==========================================================================
-   BiB (Browser inside Browser) — Theme Variables
-   ========================================================================== */
+/**
+ * BiB 2.0 — Theme Controller Stylesheet
+ * Light Mode (Primary showcase), Dark Mode, and System Theme
+ */
 
-:root,
-[data-theme="dark"] {
-    --color-scheme: dark;
-
-    /* Desktop Environment */
-    --desktop-bg: radial-gradient(circle at 50% 30%, #1a1e2d 0%, #0d1017 65%, #07090e 100%);
-    --desktop-pattern: rgba(255, 255, 255, 0.025);
-
-    /* Browser Shell */
-    --bg-window: rgba(23, 27, 38, 0.88);
-    --bg-window-solid: #171b26;
-    --bg-window-border: rgba(255, 255, 255, 0.09);
-    --window-shadow: 0 30px 90px -15px rgba(0, 0, 0, 0.75), 0 0 1px 1px rgba(255, 255, 255, 0.1);
-
-    /* Tab Bar */
-    --bg-tab-bar: rgba(16, 19, 27, 0.7);
-    --bg-tab-inactive: transparent;
-    --bg-tab-hover: rgba(255, 255, 255, 0.06);
-    --bg-tab-active: rgba(30, 36, 51, 0.95);
-    --tab-active-border: rgba(255, 255, 255, 0.12);
-    --tab-text-inactive: #8e99b2;
-    --tab-text-active: #f1f5f9;
-    --tab-indicator: #6366f1;
-
-    /* Toolbar & Navigation */
-    --bg-toolbar: rgba(26, 31, 44, 0.9);
-    --toolbar-border: rgba(255, 255, 255, 0.07);
-    --btn-hover: rgba(255, 255, 255, 0.09);
-    --btn-active: rgba(255, 255, 255, 0.15);
-    --btn-icon: #94a3b8;
-    --btn-icon-hover: #f8fafc;
-    --btn-icon-disabled: rgba(148, 163, 184, 0.35);
-
-    /* Address Bar (Omnibox) */
-    --bg-address-bar: rgba(13, 16, 24, 0.75);
-    --bg-address-bar-focus: rgba(11, 14, 21, 0.95);
-    --address-bar-border: rgba(255, 255, 255, 0.08);
-    --address-bar-border-focus: rgba(99, 102, 241, 0.55);
-    --address-bar-glow: 0 0 0 3px rgba(99, 102, 241, 0.22);
-    --address-bar-text: #f8fafc;
-    --address-bar-subtext: #64748b;
-    --address-protocol: #38bdf8;
-
-    /* Bookmark Bar */
-    --bg-bookmark-bar: rgba(21, 25, 36, 0.85);
-    --bookmark-border: rgba(255, 255, 255, 0.05);
-    --bookmark-text: #cbd5e1;
-    --bookmark-hover: rgba(255, 255, 255, 0.07);
-
-    /* Web Viewport & Pages */
-    --bg-viewport: #0f131c;
-    --bg-surface-1: rgba(26, 32, 46, 0.6);
-    --bg-surface-2: rgba(33, 41, 59, 0.7);
-    --bg-surface-3: rgba(43, 53, 76, 0.85);
-    --card-border: rgba(255, 255, 255, 0.08);
-    --card-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.45);
-
-    /* Typography */
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
-    --text-link: #60a5fa;
-
-    /* Brand & Accents */
-    --accent: #6366f1;
-    --accent-hover: #4f46e5;
-    --accent-glow: rgba(99, 102, 241, 0.4);
-    --accent-rgb: 99, 102, 241;
-    --accent-secondary: #a855f7;
-
-    /* State Colors */
-    --success: #10b981;
-    --warning: #f59e0b;
-    --danger: #ef4444;
-    --security-lock: #10b981;
-
-    /* Status Bar */
-    --bg-status-bar: rgba(18, 22, 31, 0.95);
-    --status-border: rgba(255, 255, 255, 0.06);
-    --status-text: #64748b;
-
-    /* Popovers, Menus, Modals */
-    --bg-menu: rgba(24, 29, 42, 0.96);
-    --menu-border: rgba(255, 255, 255, 0.12);
-    --menu-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.7), 0 0 1px 1px rgba(255, 255, 255, 0.08);
-    --menu-hover: rgba(99, 102, 241, 0.15);
-    --menu-text: #e2e8f0;
-
-    /* Scrollbars */
-    --scrollbar-track: rgba(0, 0, 0, 0.15);
-    --scrollbar-thumb: rgba(255, 255, 255, 0.16);
-    --scrollbar-thumb-hover: rgba(255, 255, 255, 0.28);
-}
-
-/* ==========================================================================
-   Light Theme
-   ========================================================================== */
+/* Explicit Light Theme */
 [data-theme="light"] {
-    --color-scheme: light;
+    --color-bg: #F5F5F7;
+    --color-bg-dock: rgba(255, 255, 255, 0.85);
+    
+    --color-surface: #FFFFFF;
+    --color-surface-secondary: #F2F2F7;
+    --color-surface-tertiary: #E5E5EA;
+    --color-surface-hover: rgba(0, 0, 0, 0.04);
+    --color-surface-active: rgba(0, 0, 0, 0.08);
 
-    /* Desktop Environment */
-    --desktop-bg: radial-gradient(circle at 50% 30%, #e2e8f0 0%, #cbd5e1 65%, #94a3b8 100%);
-    --desktop-pattern: rgba(0, 0, 0, 0.03);
+    --color-text: #1D1D1F;
+    --color-text-secondary: #6E6E73;
+    --color-text-tertiary: #86868B;
+    --color-text-link: #0066CC;
 
-    /* Browser Shell */
-    --bg-window: rgba(248, 250, 252, 0.92);
-    --bg-window-solid: #f8fafc;
-    --bg-window-border: rgba(0, 0, 0, 0.1);
-    --window-shadow: 0 25px 80px -15px rgba(15, 23, 42, 0.25), 0 0 1px 1px rgba(0, 0, 0, 0.08);
+    --color-border: rgba(0, 0, 0, 0.08);
+    --color-border-subtle: rgba(0, 0, 0, 0.04);
+    --color-border-strong: rgba(0, 0, 0, 0.15);
 
-    /* Tab Bar */
-    --bg-tab-bar: rgba(226, 232, 240, 0.85);
-    --bg-tab-inactive: transparent;
-    --bg-tab-hover: rgba(255, 255, 255, 0.6);
-    --bg-tab-active: #ffffff;
-    --tab-active-border: rgba(0, 0, 0, 0.06);
-    --tab-text-inactive: #64748b;
-    --tab-text-active: #0f172a;
-    --tab-indicator: #4f46e5;
+    --color-accent: #0071E3;
+    --color-accent-hover: #0077ED;
+    --color-accent-subtle: rgba(0, 113, 227, 0.08);
+    --color-accent-text: #FFFFFF;
 
-    /* Toolbar & Navigation */
-    --bg-toolbar: #ffffff;
-    --toolbar-border: rgba(0, 0, 0, 0.06);
-    --btn-hover: rgba(0, 0, 0, 0.05);
-    --btn-active: rgba(0, 0, 0, 0.1);
-    --btn-icon: #475569;
-    --btn-icon-hover: #0f172a;
-    --btn-icon-disabled: rgba(148, 163, 184, 0.5);
-
-    /* Address Bar (Omnibox) */
-    --bg-address-bar: #f1f5f9;
-    --bg-address-bar-focus: #ffffff;
-    --address-bar-border: rgba(0, 0, 0, 0.09);
-    --address-bar-border-focus: #6366f1;
-    --address-bar-glow: 0 0 0 3px rgba(99, 102, 241, 0.18);
-    --address-bar-text: #0f172a;
-    --address-bar-subtext: #94a3b8;
-    --address-protocol: #0284c7;
-
-    /* Bookmark Bar */
-    --bg-bookmark-bar: #f8fafc;
-    --bookmark-border: rgba(0, 0, 0, 0.05);
-    --bookmark-text: #334155;
-    --bookmark-hover: rgba(0, 0, 0, 0.05);
-
-    /* Web Viewport & Pages */
-    --bg-viewport: #ffffff;
-    --bg-surface-1: #f8fafc;
-    --bg-surface-2: #f1f5f9;
-    --bg-surface-3: #e2e8f0;
-    --card-border: rgba(0, 0, 0, 0.08);
-    --card-shadow: 0 4px 18px -4px rgba(0, 0, 0, 0.07);
-
-    /* Typography */
-    --text-primary: #0f172a;
-    --text-secondary: #475569;
-    --text-muted: #94a3b8;
-    --text-link: #2563eb;
-
-    /* Brand & Accents */
-    --accent: #4f46e5;
-    --accent-hover: #4338ca;
-    --accent-glow: rgba(79, 70, 229, 0.25);
-    --accent-rgb: 79, 70, 229;
-    --accent-secondary: #9333ea;
-
-    /* State Colors */
-    --success: #059669;
-    --warning: #d97706;
-    --danger: #dc2626;
-    --security-lock: #059669;
-
-    /* Status Bar */
-    --bg-status-bar: #f1f5f9;
-    --status-border: rgba(0, 0, 0, 0.06);
-    --status-text: #64748b;
-
-    /* Popovers, Menus, Modals */
-    --bg-menu: rgba(255, 255, 255, 0.97);
-    --menu-border: rgba(0, 0, 0, 0.12);
-    --menu-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.18), 0 0 1px 1px rgba(0, 0, 0, 0.05);
-    --menu-hover: rgba(79, 70, 229, 0.08);
-    --menu-text: #1e293b;
-
-    /* Scrollbars */
-    --scrollbar-track: rgba(0, 0, 0, 0.04);
-    --scrollbar-thumb: rgba(0, 0, 0, 0.18);
-    --scrollbar-thumb-hover: rgba(0, 0, 0, 0.35);
+    --shadow-window: 0 24px 80px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.03);
+    --shadow-popover: 0 16px 44px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04);
+    --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.03);
 }
 
-/* ==========================================================================
-   Midnight Theme (Futuristic Deep Navy)
-   ========================================================================== */
-[data-theme="midnight"] {
-    --color-scheme: dark;
+/* Explicit Dark Theme */
+[data-theme="dark"] {
+    --color-bg: #121214;
+    --color-bg-dock: rgba(30, 30, 32, 0.85);
 
-    /* Desktop Environment */
-    --desktop-bg: radial-gradient(circle at 50% 20%, #0c1a30 0%, #060e1d 60%, #02060d 100%);
-    --desktop-pattern: rgba(56, 189, 248, 0.03);
+    --color-surface: #1E1E20;
+    --color-surface-secondary: #28282B;
+    --color-surface-tertiary: #343438;
+    --color-surface-hover: rgba(255, 255, 255, 0.06);
+    --color-surface-active: rgba(255, 255, 255, 0.1);
 
-    /* Browser Shell */
-    --bg-window: rgba(10, 20, 38, 0.9);
-    --bg-window-solid: #0a1426;
-    --bg-window-border: rgba(56, 189, 248, 0.14);
-    --window-shadow: 0 30px 100px -15px rgba(2, 6, 13, 0.9), 0 0 1px 1px rgba(56, 189, 248, 0.16);
+    --color-text: #F5F5F7;
+    --color-text-secondary: #98989D;
+    --color-text-tertiary: #68686D;
+    --color-text-link: #2997FF;
 
-    /* Tab Bar */
-    --bg-tab-bar: rgba(6, 13, 26, 0.85);
-    --bg-tab-inactive: transparent;
-    --bg-tab-hover: rgba(56, 189, 248, 0.08);
-    --bg-tab-active: rgba(14, 28, 54, 0.95);
-    --tab-active-border: rgba(56, 189, 248, 0.25);
-    --tab-text-inactive: #7dd3fc;
-    --tab-text-active: #f0f9ff;
-    --tab-indicator: #06b6d4;
+    --color-border: rgba(255, 255, 255, 0.1);
+    --color-border-subtle: rgba(255, 255, 255, 0.05);
+    --color-border-strong: rgba(255, 255, 255, 0.18);
 
-    /* Toolbar & Navigation */
-    --bg-toolbar: rgba(11, 23, 44, 0.92);
-    --toolbar-border: rgba(56, 189, 248, 0.12);
-    --btn-hover: rgba(56, 189, 248, 0.12);
-    --btn-active: rgba(56, 189, 248, 0.2);
-    --btn-icon: #93c5fd;
-    --btn-icon-hover: #e0f2fe;
-    --btn-icon-disabled: rgba(147, 197, 253, 0.3);
+    --color-accent: #2997FF;
+    --color-accent-hover: #409CFF;
+    --color-accent-subtle: rgba(41, 151, 255, 0.15);
+    --color-accent-text: #FFFFFF;
 
-    /* Address Bar (Omnibox) */
-    --bg-address-bar: rgba(6, 12, 24, 0.85);
-    --bg-address-bar-focus: rgba(3, 8, 18, 0.95);
-    --address-bar-border: rgba(56, 189, 248, 0.16);
-    --address-bar-border-focus: #38bdf8;
-    --address-bar-glow: 0 0 0 3px rgba(56, 189, 248, 0.22);
-    --address-bar-text: #f0f9ff;
-    --address-bar-subtext: #38bdf8;
-    --address-protocol: #06b6d4;
-
-    /* Bookmark Bar */
-    --bg-bookmark-bar: rgba(9, 18, 35, 0.85);
-    --bookmark-border: rgba(56, 189, 248, 0.08);
-    --bookmark-text: #bae6fd;
-    --bookmark-hover: rgba(56, 189, 248, 0.1);
-
-    /* Web Viewport & Pages */
-    --bg-viewport: #050b16;
-    --bg-surface-1: rgba(12, 24, 46, 0.65);
-    --bg-surface-2: rgba(18, 36, 68, 0.75);
-    --bg-surface-3: rgba(24, 48, 90, 0.85);
-    --card-border: rgba(56, 189, 248, 0.15);
-    --card-shadow: 0 8px 28px -6px rgba(0, 0, 0, 0.6);
-
-    /* Typography */
-    --text-primary: #f0f9ff;
-    --text-secondary: #93c5fd;
-    --text-muted: #60a5fa;
-    --text-link: #38bdf8;
-
-    /* Brand & Accents */
-    --accent: #0284c7;
-    --accent-hover: #0369a1;
-    --accent-glow: rgba(2, 132, 199, 0.45);
-    --accent-rgb: 2, 132, 199;
-    --accent-secondary: #06b6d4;
-
-    /* State Colors */
-    --success: #10b981;
-    --warning: #f59e0b;
-    --danger: #f43f5e;
-    --security-lock: #38bdf8;
-
-    /* Status Bar */
-    --bg-status-bar: rgba(6, 14, 28, 0.95);
-    --status-border: rgba(56, 189, 248, 0.1);
-    --status-text: #7dd3fc;
-
-    /* Popovers, Menus, Modals */
-    --bg-menu: rgba(10, 22, 42, 0.96);
-    --menu-border: rgba(56, 189, 248, 0.2);
-    --menu-shadow: 0 16px 42px -8px rgba(0, 0, 0, 0.85);
-    --menu-hover: rgba(56, 189, 248, 0.15);
-    --menu-text: #e0f2fe;
-
-    /* Scrollbars */
-    --scrollbar-track: rgba(0, 0, 0, 0.25);
-    --scrollbar-thumb: rgba(56, 189, 248, 0.2);
-    --scrollbar-thumb-hover: rgba(56, 189, 248, 0.4);
+    --shadow-window: 0 30px 100px rgba(0, 0, 0, 0.65), 0 0 1px 1px rgba(255, 255, 255, 0.08);
+    --shadow-popover: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 1px 1px rgba(255, 255, 255, 0.1);
+    --shadow-card: 0 4px 14px rgba(0, 0, 0, 0.35);
 }
 
-/* ==========================================================================
-   Cyber Theme (Neon Tech / Cyberpunk)
-   ========================================================================== */
-[data-theme="cyber"] {
-    --color-scheme: dark;
+/* System Theme (Matches OS preferences when data-theme="system") */
+@media (prefers-color-scheme: dark) {
+    [data-theme="system"] {
+        --color-bg: #121214;
+        --color-bg-dock: rgba(30, 30, 32, 0.85);
 
-    /* Desktop Environment */
-    --desktop-bg: radial-gradient(circle at 50% 20%, #150928 0%, #0a0316 60%, #030108 100%);
-    --desktop-pattern: rgba(255, 0, 128, 0.05);
+        --color-surface: #1E1E20;
+        --color-surface-secondary: #28282B;
+        --color-surface-tertiary: #343438;
+        --color-surface-hover: rgba(255, 255, 255, 0.06);
+        --color-surface-active: rgba(255, 255, 255, 0.1);
 
-    /* Browser Shell */
-    --bg-window: rgba(16, 7, 28, 0.94);
-    --bg-window-solid: #10071c;
-    --bg-window-border: rgba(0, 255, 204, 0.3);
-    --window-shadow: 0 30px 100px -10px rgba(0, 0, 0, 0.9), 0 0 15px rgba(0, 255, 204, 0.15);
+        --color-text: #F5F5F7;
+        --color-text-secondary: #98989D;
+        --color-text-tertiary: #68686D;
+        --color-text-link: #2997FF;
 
-    /* Tab Bar */
-    --bg-tab-bar: rgba(10, 4, 18, 0.9);
-    --bg-tab-inactive: transparent;
-    --bg-tab-hover: rgba(0, 255, 204, 0.09);
-    --bg-tab-active: rgba(26, 13, 44, 0.95);
-    --tab-active-border: rgba(0, 255, 204, 0.45);
-    --tab-text-inactive: #ff77d6;
-    --tab-text-active: #00ffcc;
-    --tab-indicator: #00ffcc;
+        --color-border: rgba(255, 255, 255, 0.1);
+        --color-border-subtle: rgba(255, 255, 255, 0.05);
+        --color-border-strong: rgba(255, 255, 255, 0.18);
 
-    /* Toolbar & Navigation */
-    --bg-toolbar: rgba(18, 9, 32, 0.95);
-    --toolbar-border: rgba(255, 0, 128, 0.25);
-    --btn-hover: rgba(0, 255, 204, 0.15);
-    --btn-active: rgba(255, 0, 128, 0.25);
-    --btn-icon: #00ffcc;
-    --btn-icon-hover: #ffffff;
-    --btn-icon-disabled: rgba(0, 255, 204, 0.3);
+        --color-accent: #2997FF;
+        --color-accent-hover: #409CFF;
+        --color-accent-subtle: rgba(41, 151, 255, 0.15);
+        --color-accent-text: #FFFFFF;
 
-    /* Address Bar (Omnibox) */
-    --bg-address-bar: rgba(8, 3, 14, 0.9);
-    --bg-address-bar-focus: #05020a;
-    --address-bar-border: rgba(0, 255, 204, 0.35);
-    --address-bar-border-focus: #00ffcc;
-    --address-bar-glow: 0 0 12px rgba(0, 255, 204, 0.45);
-    --address-bar-text: #00ffcc;
-    --address-bar-subtext: #ff77d6;
-    --address-protocol: #ff007f;
-
-    /* Bookmark Bar */
-    --bg-bookmark-bar: rgba(14, 6, 26, 0.9);
-    --bookmark-border: rgba(0, 255, 204, 0.15);
-    --bookmark-text: #ffb8ec;
-    --bookmark-hover: rgba(0, 255, 204, 0.12);
-
-    /* Web Viewport & Pages */
-    --bg-viewport: #07020d;
-    --bg-surface-1: rgba(24, 11, 42, 0.7);
-    --bg-surface-2: rgba(36, 17, 62, 0.8);
-    --bg-surface-3: rgba(50, 22, 86, 0.9);
-    --card-border: rgba(0, 255, 204, 0.25);
-    --card-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.8), 0 0 10px rgba(255, 0, 128, 0.15);
-
-    /* Typography */
-    --text-primary: #ffffff;
-    --text-secondary: #00ffcc;
-    --text-muted: #ff77d6;
-    --text-link: #00ffcc;
-
-    /* Brand & Accents */
-    --accent: #ff007f;
-    --accent-hover: #e00070;
-    --accent-glow: rgba(255, 0, 127, 0.5);
-    --accent-rgb: 255, 0, 127;
-    --accent-secondary: #00ffcc;
-
-    /* State Colors */
-    --success: #00ffcc;
-    --warning: #ffbe0b;
-    --danger: #ff0055;
-    --security-lock: #00ffcc;
-
-    /* Status Bar */
-    --bg-status-bar: rgba(9, 3, 16, 0.98);
-    --status-border: rgba(0, 255, 204, 0.2);
-    --status-text: #00ffcc;
-
-    /* Popovers, Menus, Modals */
-    --bg-menu: rgba(18, 8, 32, 0.98);
-    --menu-border: rgba(0, 255, 204, 0.4);
-    --menu-shadow: 0 16px 45px -8px rgba(0, 0, 0, 0.9), 0 0 15px rgba(255, 0, 128, 0.2);
-    --menu-hover: rgba(0, 255, 204, 0.18);
-    --menu-text: #f5d0fe;
-
-    /* Scrollbars */
-    --scrollbar-track: rgba(0, 0, 0, 0.4);
-    --scrollbar-thumb: rgba(0, 255, 204, 0.3);
-    --scrollbar-thumb-hover: #00ffcc;
-}
-
-/* Global Font & System Metric Tokens */
-:root {
-    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", "Helvetica Neue", sans-serif;
-    --font-mono: "Fira Code", "JetBrains Mono", Consolas, Menlo, Monaco, "Courier New", monospace;
-
-    --radius-window: 14px;
-    --radius-tab: 10px;
-    --radius-sm: 6px;
-    --radius-md: 10px;
-    --radius-lg: 16px;
-    --radius-full: 9999px;
-
-    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-base: 240ms cubic-bezier(0.16, 1, 0.3, 1);
-    --transition-smooth: 350ms cubic-bezier(0.16, 1, 0.3, 1);
-
-    --header-height: 42px;
-    --toolbar-height: 46px;
-    --bookmark-height: 34px;
-    --status-height: 28px;
+        --shadow-window: 0 30px 100px rgba(0, 0, 0, 0.65), 0 0 1px 1px rgba(255, 255, 255, 0.08);
+        --shadow-popover: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 1px 1px rgba(255, 255, 255, 0.1);
+        --shadow-card: 0 4px 14px rgba(0, 0, 0, 0.35);
+    }
 }

@@ -1,62 +1,77 @@
 /**
- * BiB (Browser inside Browser) — Theme Manager
- * Manages Dark, Light, Midnight, and Cyber modes
+ * BiB 2.0 — Theme Manager
+ * Apple Light Mode (Default), Dark Mode, and System Appearance matching
  */
 
-class ThemeManager {
-    constructor() {
-        this.themes = ['dark', 'light', 'midnight', 'cyber'];
-        this.currentTheme = 'dark';
-        this.init();
-    }
+"use strict";
 
-    init() {
-        const savedTheme = window.storageManager.get('theme', 'dark');
-        this.setTheme(savedTheme, false);
-    }
-
-    setTheme(themeName, notify = true) {
-        if (!this.themes.includes(themeName)) {
-            themeName = 'dark';
+(function (window) {
+    class ThemeManager {
+        constructor() {
+            this.themes = ["light", "dark", "system"];
+            this.currentTheme = "light";
+            this.mediaQuery = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
         }
 
-        this.currentTheme = themeName;
-        document.documentElement.setAttribute('data-theme', themeName);
-        window.storageManager.set('theme', themeName);
+        init() {
+            const savedTheme = window.BiB.Storage.get("theme", "light");
+            this.setTheme(savedTheme, false);
 
-        // Update any theme indicators in the settings or menus
-        document.querySelectorAll('[data-theme-option]').forEach(el => {
-            const opt = el.getAttribute('data-theme-option');
-            if (opt === themeName) {
-                el.classList.add('is-active');
-            } else {
-                el.classList.remove('is-active');
+            if (this.mediaQuery) {
+                this.mediaQuery.addEventListener("change", () => {
+                    if (this.currentTheme === "system") {
+                        this._applySystemTheme();
+                    }
+                });
             }
-        });
+        }
 
-        // Broadcast custom event
-        window.dispatchEvent(new CustomEvent('bib:theme-change', { detail: { theme: themeName } }));
+        setTheme(themeName, notify = true) {
+            if (!this.themes.includes(themeName)) {
+                themeName = "light";
+            }
 
-        if (notify && window.notificationManager) {
-            const prettyNames = {
-                dark: 'Dark Slate',
-                light: 'Clean Light',
-                midnight: 'Deep Midnight',
-                cyber: 'Cyber Neon'
-            };
-            window.notificationManager.show(`Switched to ${prettyNames[themeName]} theme`, 'theme', '🎨', 2000);
+            this.currentTheme = themeName;
+            window.BiB.Storage.set("theme", themeName);
+
+            if (themeName === "system") {
+                this._applySystemTheme();
+            } else {
+                document.documentElement.setAttribute("data-theme", themeName);
+            }
+
+            // Update UI indicators
+            document.querySelectorAll("[data-theme-value]").forEach(el => {
+                const val = el.getAttribute("data-theme-value");
+                if (val === themeName) {
+                    el.classList.add("is-active");
+                } else {
+                    el.classList.remove("is-active");
+                }
+            });
+
+            window.dispatchEvent(new CustomEvent("bib:theme-changed", { detail: { theme: themeName } }));
+
+            if (notify && window.BiB && window.BiB.Notifications) {
+                const names = { light: "Light Mode", dark: "Dark Mode", system: "System Theme" };
+                window.BiB.Notifications.show(`Switched to ${names[themeName]}`, "info", "sun", 1800);
+            }
+        }
+
+        _applySystemTheme() {
+            document.documentElement.setAttribute("data-theme", "system");
+        }
+
+        getTheme() {
+            return this.currentTheme;
+        }
+
+        toggleTheme() {
+            const next = this.currentTheme === "light" ? "dark" : "light";
+            this.setTheme(next, true);
         }
     }
 
-    getTheme() {
-        return this.currentTheme;
-    }
-
-    cycleTheme() {
-        const nextIdx = (this.themes.indexOf(this.currentTheme) + 1) % this.themes.length;
-        this.setTheme(this.themes[nextIdx], true);
-    }
-}
-
-// Export singleton instance
-window.themeManager = new ThemeManager();
+    window.BiB = window.BiB || {};
+    window.BiB.Themes = new ThemeManager();
+})(window);

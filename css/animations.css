@@ -1,0 +1,306 @@
+/* ==========================================================================
+   BiB (Browser inside Browser) — Animations & Keyframes
+   ========================================================================== */
+
+/* Tab Entry and Exit */
+@keyframes tabEnter {
+    0% {
+        opacity: 0;
+        transform: translateY(6px) scale(0.96);
+        max-width: 40px;
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        max-width: 240px;
+    }
+}
+
+@keyframes tabExit {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+        max-width: 240px;
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.85);
+        max-width: 0;
+        padding-left: 0;
+        padding-right: 0;
+        margin-right: 0;
+    }
+}
+
+.tab-entering {
+    animation: tabEnter var(--transition-base) forwards;
+}
+
+.tab-exiting {
+    animation: tabExit var(--transition-base) forwards;
+    pointer-events: none;
+}
+
+/* Loading Progress Bar */
+@keyframes loadingShimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+@keyframes progressPulse {
+    0%, 100% {
+        box-shadow: 0 0 8px var(--accent-glow);
+    }
+    50% {
+        box-shadow: 0 0 16px var(--accent-glow), 0 0 4px #ffffff;
+    }
+}
+
+.loading-bar-active {
+    animation: progressPulse 1.2s infinite ease-in-out;
+}
+
+/* Star Bookmark Sparkle */
+@keyframes starPop {
+    0% {
+        transform: scale(1);
+    }
+    40% {
+        transform: scale(1.4) rotate(-15deg);
+        filter: drop-shadow(0 0 8px #f59e0b);
+    }
+    70% {
+        transform: scale(0.9) rotate(10deg);
+    }
+    100% {
+        transform: scale(1) rotate(0deg);
+    }
+}
+
+.star-pop {
+    animation: starPop 450ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes sparkleBurst {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(0.2);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(var(--tx, -50%), var(--ty, -50%)) scale(1);
+    }
+}
+
+/* Window Playful Shake (on close attempt) */
+@keyframes windowRefusalShake {
+    0%, 100% { transform: translateX(0); }
+    15% { transform: translateX(-8px) rotate(-0.5deg); }
+    30% { transform: translateX(8px) rotate(0.5deg); }
+    45% { transform: translateX(-6px) rotate(-0.3deg); }
+    60% { transform: translateX(6px) rotate(0.3deg); }
+    75% { transform: translateX(-3px); }
+    90% { transform: translateX(3px); }
+}
+
+.window-shake {
+    animation: windowRefusalShake 600ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+/* Window Minimize / Restore */
+@keyframes windowMinimize {
+    0% {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(0.7) translateY(80px);
+        opacity: 0;
+        pointer-events: none;
+    }
+}
+
+@keyframes windowRestore {
+    0% {
+        transform: scale(0.7) translateY(80px);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+.minimized {
+    animation: windowMinimize 320ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.restoring {
+    animation: windowRestore 350ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Dropdown & Context Menu Animations */
+@keyframes menuAppear {
+    0% {
+        opacity: 0;
+        transform: scale(0.95) translateY(-6px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.menu-show {
+    animation: menuAppear 180ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Toast Notifications */
+@keyframes toastSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.94);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes toastSlideOut {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(12px) scale(0.94);
+    }
+}
+
+.toast-enter {
+    animation: toastSlideIn 240ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.toast-exit {
+    animation: toastSlideOut 200ms cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+/* Modal Fade & Backdrop */
+@keyframes modalBackdropFadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+@keyframes modalContentPopIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.92) translateY(12px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.modal-backdrop-in {
+    animation: modalBackdropFadeIn 220ms ease-out forwards;
+}
+
+.modal-content-in {
+    animation: modalContentPopIn 260ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Aurora / Glow background pulse for Home Page */
+@keyframes auroraFloat {
+    0%, 100% {
+        transform: translate(0, 0) scale(1);
+        opacity: 0.6;
+    }
+    50% {
+        transform: translate(30px, -20px) scale(1.15);
+        opacity: 0.85;
+    }
+}
+
+.aurora-blob {
+    animation: auroraFloat 12s infinite ease-in-out alternate;
+}
+
+/* DevTools Terminal Blinking Cursor */
+@keyframes cursorBlink {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+}
+
+.cli-cursor {
+    animation: cursorBlink 1s infinite;
+}
+
+/* Click the Dot Target Animation */
+@keyframes targetSpawn {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    60% {
+        transform: scale(1.15);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.game-dot-target {
+    animation: targetSpawn 220ms cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Cyber Theme Scanline Animation */
+@keyframes scanline {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(1000%); }
+}
+
+[data-theme="cyber"] .viewport::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    pointer-events: none;
+    background: linear-gradient(
+        rgba(18, 16, 16, 0) 50%, 
+        rgba(0, 255, 204, 0.02) 50%
+    ), linear-gradient(
+        90deg,
+        rgba(255, 0, 128, 0.03),
+        rgba(0, 255, 204, 0.01),
+        rgba(0, 0, 255, 0.03)
+    );
+    background-size: 100% 3px, 6px 100%;
+    z-index: 99;
+}
+
+/* Accessibility: Respect Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+    .loading-bar-active,
+    .aurora-blob,
+    .cli-cursor {
+        animation: none !important;
+    }
+}

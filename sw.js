@@ -3,7 +3,7 @@
  * Relative scope caching compatible with GitHub Pages
  */
 
-const CACHE_NAME = "bib-v2-cache-v1";
+const CACHE_NAME = "bib-v2-cache-v2";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
@@ -40,10 +40,11 @@ const ASSETS_TO_CACHE = [
 ];
 
 self.addEventListener("install", (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS_TO_CACHE);
-    }).then(() => self.skipWaiting())
+    })
   );
 });
 
@@ -61,14 +62,14 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+// Network-first strategy with cache fallback
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
 
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      if (cached) return cached;
-      return fetch(event.request).then((response) => {
-        if (!response || response.status !== 200 || response.type !== "basic") {
+    fetch(event.request)
+      .then((response) => {
+        if (!response || response.status !== 200) {
           return response;
         }
         const cloned = response.clone();
@@ -76,12 +77,14 @@ self.addEventListener("fetch", (event) => {
           cache.put(event.request, cloned);
         });
         return response;
-      }).catch(() => {
-        // Return index.html offline fallback for navigation requests
-        if (event.request.mode === "navigate") {
-          return caches.match("./index.html");
-        }
-      });
-    })
+      })
+      .catch(() => {
+        return caches.match(event.request).then((cached) => {
+          if (cached) return cached;
+          if (event.request.mode === "navigate") {
+            return caches.match("./index.html");
+          }
+        });
+      })
   );
 });

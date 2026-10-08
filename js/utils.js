@@ -49,7 +49,7 @@
         getIcon(name, className = "icon", size = 18) {
             const svg = ICONS[name] || ICONS["search"];
             if (!className && !size) return svg;
-            return svg.replace('<svg ', `<svg class="${className}" width="${size}" height="${size}" aria-hidden="true" `);
+            return svg.replace('<svg ', `<svg class="${className}" width="${size}" height="${size}" style="width:${size}px;height:${size}px;max-width:${size}px;max-height:${size}px;flex-shrink:0;vertical-align:middle;" aria-hidden="true" `);
         },
 
         createElement(tag, className = "", innerHTML = "", attributes = {}) {

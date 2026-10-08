@@ -48,7 +48,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // 6. Register PWA Service Worker (relative scope for GitHub Pages)
     if ("serviceWorker" in navigator && location.protocol !== "file:") {
         navigator.serviceWorker.register("./sw.js", { scope: "./" })
-            .then(() => console.log("[BiB PWA] Service Worker registered"))
+            .then(reg => {
+                reg.update();
+                console.log("[BiB PWA] Service Worker registered & checked for updates");
+            })
             .catch(err => console.log("[BiB PWA] SW registration note", err));
     }
 });

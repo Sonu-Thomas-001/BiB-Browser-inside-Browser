@@ -50,11 +50,11 @@ body {
 /* Global SVG Icons */
 svg.icon,
 .icon {
-    width: 18px;
-    height: 18px;
-    max-width: 18px;
-    max-height: 18px;
-    flex-shrink: 0;
+    width: 18px !important;
+    height: 18px !important;
+    max-width: 18px !important;
+    max-height: 18px !important;
+    flex-shrink: 0 !important;
     vertical-align: middle;
 }
 

@@ -95,12 +95,23 @@
     transition: background-color var(--duration-fast), border-color var(--duration-fast), box-shadow var(--duration-fast);
 }
 
+.start-search-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px !important;
+    max-width: 18px !important;
+    flex-shrink: 0 !important;
+}
+
 .start-search-box svg {
-    width: 18px;
-    height: 18px;
-    max-width: 18px;
-    max-height: 18px;
-    flex-shrink: 0;
+    width: 18px !important;
+    height: 18px !important;
+    max-width: 18px !important;
+    max-height: 18px !important;
+    flex-shrink: 0 !important;
     stroke: var(--color-text-tertiary);
 }
 

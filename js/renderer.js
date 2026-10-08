@@ -106,7 +106,9 @@
                     <p class="start-subtitle">A tiny browser living inside your browser.</p>
 
                     <div class="start-search-box">
-                        ${u.getIcon("search")}
+                        <span class="start-search-icon" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;min-width:18px;max-width:18px;flex-shrink:0;line-height:0;">
+                            ${u.getIcon("search", "icon", 18)}
+                        </span>
                         <input type="text" id="startSearchInput" class="start-search-input" placeholder="Search or enter website" spellcheck="false" autocomplete="off">
                     </div>
 

@@ -1,162 +1,160 @@
 /**
- * BiB (Browser inside Browser) — Search & Omnibox Engine
- * Handles URL parsing, simulated search generation, and autocomplete suggestions
+ * BiB 2.0 — Search Engine & Query Normalizer
+ * Omnibox suggestion provider and deterministic offline search results
  */
 
-class SearchEngine {
-    constructor() {
-        this.internalPages = [
-            { title: 'Welcome Page', url: 'bib://welcome', icon: '🚀' },
-            { title: 'Home Dashboard', url: 'bib://home', icon: '🏠' },
-            { title: 'About BiB', url: 'bib://about', icon: 'ℹ️' },
-            { title: 'Developer Console & DevTools', url: 'bib://developer', icon: '⚡' },
-            { title: 'Browsing History', url: 'bib://history', icon: '📜' },
-            { title: 'Saved Bookmarks', url: 'bib://bookmarks', icon: '⭐' },
-            { title: 'Browser Settings', url: 'bib://settings', icon: '⚙️' },
-            { title: 'Downloads Manager', url: 'bib://downloads', icon: '📥' },
-            { title: 'Arcade Mini Games', url: 'bib://games', icon: '🎮' },
-            { title: 'Secret Vault (Easter Egg)', url: 'bib://secret', icon: '👾' },
-            { title: '404 Simulation', url: 'bib://404', icon: '🛸' },
-            { title: 'Google Search Simulation', url: 'https://google.com', icon: '🔍' },
-            { title: 'GitHub Repository Simulation', url: 'https://github.com', icon: '🐙' },
-            { title: 'Example Domain', url: 'https://example.com', icon: '🌐' },
-            { title: 'Tech News Feed', url: 'https://news.local', icon: '📰' },
-            { title: 'Social Stream Feed', url: 'https://social.local', icon: '💬' }
-        ];
-    }
+"use strict";
 
-    normalizeInput(rawInput) {
-        if (!rawInput) return 'bib://home';
-        const trimmed = rawInput.trim();
+(function (window) {
+    const INTERNAL_PAGES = [
+        { title: "Start Page", url: "bib://home", icon: "search" },
+        { title: "Welcome Tour", url: "bib://welcome", icon: "info" },
+        { title: "Developer Tools", url: "bib://developer", icon: "terminal" },
+        { title: "Browsing History", url: "bib://history", icon: "history" },
+        { title: "Saved Bookmarks", url: "bib://bookmarks", icon: "star" },
+        { title: "Downloads Manager", url: "bib://downloads", icon: "download" },
+        { title: "Arcade Games", url: "bib://games", icon: "game" },
+        { title: "Browser Settings", url: "bib://settings", icon: "settings" },
+        { title: "Privacy & Data", url: "bib://privacy", icon: "shield" },
+        { title: "Performance Metrics", url: "bib://performance", icon: "terminal" },
+        { title: "Secret Chamber", url: "bib://secret", icon: "terminal" },
+        { title: "404 Error Page", url: "bib://404", icon: "close" }
+    ];
 
-        // 1. Direct bib:// protocol
-        if (/^bib:\/\//i.test(trimmed)) {
-            return trimmed.toLowerCase();
-        }
+    class SearchEngine {
+        normalizeInput(raw) {
+            if (!raw) return "bib://home";
+            const trimmed = raw.trim();
 
-        // 2. Direct http/https protocol
-        if (/^https?:\/\//i.test(trimmed)) {
-            return trimmed;
-        }
-
-        // 3. Known domain extensions or local domains
-        const domainRegex = /^([a-zA-Z0-9-]+\.)+(com|org|net|io|dev|app|edu|gov|local)(:\d+)?(\/.*)?$/i;
-        if (domainRegex.test(trimmed)) {
-            return `https://${trimmed}`;
-        }
-
-        // 4. Fallback: treat as search query
-        return `bib://search?q=${encodeURIComponent(trimmed)}`;
-    }
-
-    getSuggestions(query) {
-        if (!query || query.trim().length === 0) {
-            return [];
-        }
-
-        const q = query.toLowerCase().trim();
-        const results = [];
-
-        // Match internal pages
-        this.internalPages.forEach(p => {
-            if (p.url.toLowerCase().includes(q) || p.title.toLowerCase().includes(q)) {
-                results.push({
-                    title: p.title,
-                    url: p.url,
-                    icon: p.icon,
-                    type: 'internal'
-                });
+            if (/^bib:\/\//i.test(trimmed)) {
+                return trimmed.toLowerCase();
             }
-        });
 
-        // Match bookmarks if available
-        if (window.bookmarksManager) {
-            window.bookmarksManager.getAll().forEach(bm => {
-                if (bm.url.toLowerCase().includes(q) || bm.title.toLowerCase().includes(q)) {
-                    if (!results.some(r => r.url.toLowerCase() === bm.url.toLowerCase())) {
-                        results.push({
-                            title: bm.title,
-                            url: bm.url,
-                            icon: bm.favicon || '⭐',
-                            type: 'bookmark'
-                        });
-                    }
+            if (/^https?:\/\//i.test(trimmed)) {
+                return trimmed;
+            }
+
+            const domainPattern = /^([a-zA-Z0-9-]+\.)+(com|org|net|io|dev|app|edu|gov|local)(:\d+)?(\/.*)?$/i;
+            if (domainPattern.test(trimmed)) {
+                return `https://${trimmed}`;
+            }
+
+            return `bib://search?q=${encodeURIComponent(trimmed)}`;
+        }
+
+        async getSuggestions(query) {
+            if (!query || !query.trim()) {
+                // Show default recent items when focused empty
+                const suggestions = [];
+                if (window.BiB && window.BiB.History) {
+                    const recent = (await window.BiB.History.getAll()).slice(0, 4);
+                    recent.forEach(r => suggestions.push({
+                        title: r.title,
+                        url: r.url,
+                        icon: "history",
+                        section: "Recent"
+                    }));
+                }
+                return suggestions;
+            }
+
+            const q = query.toLowerCase().trim();
+            const results = [];
+
+            // 1. Search Query entry
+            results.push({
+                title: `Search BiB for "${query}"`,
+                url: `bib://search?q=${encodeURIComponent(query)}`,
+                icon: "search",
+                section: "Search"
+            });
+
+            // 2. Internal page matches
+            INTERNAL_PAGES.forEach(p => {
+                if (p.url.toLowerCase().includes(q) || p.title.toLowerCase().includes(q)) {
+                    results.push({
+                        title: p.title,
+                        url: p.url,
+                        icon: p.icon,
+                        section: "Pages"
+                    });
                 }
             });
-        }
 
-        // Add Google / BiB Search suggestion
-        results.push({
-            title: `Search BiB for "${query}"`,
-            url: `bib://search?q=${encodeURIComponent(query)}`,
-            icon: '🔍',
-            type: 'search'
-        });
-
-        return results.slice(0, 6);
-    }
-
-    generateSearchResults(query) {
-        const cleanQuery = decodeURIComponent(query || '').trim();
-        const lower = cleanQuery.toLowerCase();
-
-        // Easter Egg searches
-        if (lower === 'is this a real browser' || lower === 'is this a real browser?') {
-            return {
-                query: cleanQuery,
-                isEasterEgg: true,
-                specialTitle: 'Technically no. Emotionally? Absolutely.',
-                specialDesc: 'BiB is a handcrafted browser simulation made with vanilla web technologies, living completely inside your browser. No Chromium engine, no electron overhead — pure front-end craftsmanship!',
-                results: [
-                    { title: 'The Philosophy of Browser inside Browser', url: 'bib://about', snippet: 'Read the architectural philosophy and technical breakdown behind BiB.' },
-                    { title: 'Secret Easter Egg Vault', url: 'bib://secret', snippet: 'You unlocked a curious query. Try venturing deeper into the secret chamber.' }
-                ]
-            };
-        }
-
-        if (lower === 'whoami') {
-            return {
-                query: cleanQuery,
-                isEasterEgg: true,
-                specialTitle: 'Identity Discovered',
-                specialDesc: 'You are currently an intelligent user piloting a browser simulation running inside another desktop browser. Inception level: 2.',
-                results: [
-                    { title: 'BiB Developer Console', url: 'bib://developer', snippet: 'Open the simulated terminal and test system commands like "whoami" and "sudo bib".' }
-                ]
-            };
-        }
-
-        // Contextual realistic search results
-        const dynamicResults = [
-            {
-                title: `${cleanQuery} — Interactive Guide & Overview`,
-                url: `bib://search/overview`,
-                snippet: `Comprehensive simulated documentation, articles, and interactive demos regarding "${cleanQuery}". Tested in BiB simulated runtime.`
-            },
-            {
-                title: `10 Creative Experiments & Ideas for ${cleanQuery}`,
-                url: `bib://search/ideas`,
-                snippet: `Discover top projects, curated resources, and step-by-step experiments built with modern HTML5, CSS3, and Vanilla JavaScript.`
-            },
-            {
-                title: `Awesome ${cleanQuery} Community Resources (2026 Edition)`,
-                url: `bib://search/community`,
-                snippet: `Explore tutorials, open-source repositories, developer tools, and best practices curated by the community.`
-            },
-            {
-                title: `BiB Developer Playground: Testing ${cleanQuery}`,
-                url: `bib://developer`,
-                snippet: `Launch the built-in Developer Console to inspect elements, monitor storage, and debug queries live.`
+            // 3. Bookmarks matches
+            if (window.BiB && window.BiB.Bookmarks) {
+                const bms = await window.BiB.Bookmarks.getAll();
+                bms.forEach(b => {
+                    if (b.title.toLowerCase().includes(q) || b.url.toLowerCase().includes(q)) {
+                        if (!results.some(r => r.url.toLowerCase() === b.url.toLowerCase())) {
+                            results.push({
+                                title: b.title,
+                                url: b.url,
+                                icon: "star",
+                                section: "Bookmarks"
+                            });
+                        }
+                    }
+                });
             }
-        ];
 
-        return {
-            query: cleanQuery,
-            isEasterEgg: false,
-            results: dynamicResults
-        };
+            return results.slice(0, 7);
+        }
+
+        generateResults(query) {
+            const clean = decodeURIComponent(query || "").trim();
+            const lower = clean.toLowerCase();
+
+            // Easter eggs
+            if (lower === "is this a real browser" || lower === "is this a real browser?") {
+                return {
+                    query: clean,
+                    isEasterEgg: true,
+                    title: "Technically no. Emotionally? Absolutely.",
+                    desc: "BiB is a meticulously handcrafted browser simulation living completely inside your browser. Pure front-end craftsmanship.",
+                    links: [
+                        { title: "Learn more in BiB Architecture", url: "bib://welcome", snippet: "Read the architectural principles behind BiB." }
+                    ]
+                };
+            }
+
+            if (lower === "whoami") {
+                return {
+                    query: clean,
+                    isEasterEgg: true,
+                    title: "Identity Verified",
+                    desc: "You are piloting BiB 2.0 — a browser running inside another browser.",
+                    links: [
+                        { title: "Open Developer Console", url: "bib://developer", snippet: "Run whoami, help, and tabs commands directly." }
+                    ]
+                };
+            }
+
+            // Deterministic offline search results
+            return {
+                query: clean,
+                isEasterEgg: false,
+                links: [
+                    {
+                        title: `${clean} — Complete Guide & Overview`,
+                        url: `https://example.com/${encodeURIComponent(clean)}`,
+                        snippet: `Learn everything about ${clean} with comprehensive interactive documentation and reference materials.`
+                    },
+                    {
+                        title: `Best Practices and Patterns for ${clean}`,
+                        url: `https://example.com/best-practices`,
+                        snippet: `Explore modern architecture, performance tips, and client-side implementation examples.`
+                    },
+                    {
+                        title: `Interactive Experiments with ${clean}`,
+                        url: `bib://developer`,
+                        snippet: `Launch the built-in Developer Tools to test and inspect runtime behavior.`
+                    }
+                ]
+            };
+        }
     }
-}
 
-// Export singleton instance
-window.searchEngine = new SearchEngine();
+    window.BiB = window.BiB || {};
+    window.BiB.Search = new SearchEngine();
+})(window);

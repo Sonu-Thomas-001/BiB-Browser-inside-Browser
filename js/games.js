@@ -1,432 +1,372 @@
 /**
- * BiB (Browser inside Browser) — Mini Games
- * Game 1: Click the Dot (Reflex Trainer)
- * Game 2: Browser Dino (HTML5 Canvas Runner)
+ * BiB 2.0 — Arcade Mini Games
+ * Clean, restrained Apple-style Click the Dot and Canvas Dino Runner
  */
 
-class MiniGamesManager {
-    constructor() {
-        this.dotGame = {
-            score: 0,
-            combo: 0,
-            timeLeft: 30,
-            timerId: null,
-            highScore: 0,
-            isRunning: false
-        };
+"use strict";
 
-        this.dinoGame = {
-            canvas: null,
-            ctx: null,
-            animId: null,
-            isRunning: false,
-            score: 0,
-            highScore: 0,
-            dino: { x: 40, y: 130, w: 24, h: 28, vy: 0, isGrounded: true },
-            gravity: 0.65,
-            obstacles: [],
-            speed: 4,
-            spawnTimer: 0
-        };
+(function (window) {
+    class GamesManager {
+        constructor() {
+            this.audioCtx = null;
+            this.dotState = {
+                score: 0,
+                combo: 0,
+                timeLeft: 30,
+                timerId: null,
+                isRunning: false,
+                highScore: window.BiB.Storage.get("dot_highscore", 0)
+            };
 
-        this.audioCtx = null;
-    }
-
-    _getAudioCtx() {
-        if (!this.audioCtx) {
-            const AudioCtx = window.AudioContext || window.webkitAudioContext;
-            if (AudioCtx) this.audioCtx = new AudioCtx();
-        }
-        if (this.audioCtx && this.audioCtx.state === 'suspended') {
-            this.audioCtx.resume();
-        }
-        return this.audioCtx;
-    }
-
-    playBeep(freq = 440, duration = 0.08, type = 'sine') {
-        try {
-            const ctx = this._getAudioCtx();
-            if (!ctx) return;
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.type = type;
-            osc.frequency.setValueAtTime(freq, ctx.currentTime);
-            gain.gain.setValueAtTime(0.08, ctx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.start();
-            osc.stop(ctx.currentTime + duration);
-        } catch (e) {
-            // Ignore audio issues on restricted browser environments
-        }
-    }
-
-    /* ==========================================================================
-       Game 1: Click the Dot
-       ========================================================================== */
-    initDotGame() {
-        this.dotGame.highScore = window.storageManager.get('dot_highscore', 0);
-        this.updateDotScoreBoard();
-
-        const startBtn = document.getElementById('startDotGameBtn');
-        const arena = document.getElementById('dotArena');
-
-        if (startBtn) {
-            startBtn.addEventListener('click', () => this.startDotGame());
+            this.dinoState = {
+                canvas: null,
+                ctx: null,
+                animId: null,
+                isRunning: false,
+                score: 0,
+                highScore: window.BiB.Storage.get("dino_highscore", 0),
+                dino: { x: 40, y: 130, w: 22, h: 26, vy: 0, isGrounded: true },
+                gravity: 0.65,
+                obstacles: [],
+                speed: 4,
+                spawnTimer: 0
+            };
         }
 
-        if (arena) {
-            arena.addEventListener('click', (e) => {
-                if (!this.dotGame.isRunning) return;
-                // If clicked arena but not target, reset combo
-                if (!e.target.classList.contains('dot-target')) {
-                    this.dotGame.combo = 0;
-                    this.playBeep(220, 0.1, 'sawtooth');
-                    this.updateDotScoreBoard();
+        _getAudio() {
+            if (!this.audioCtx) {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (AudioCtx) this.audioCtx = new AudioCtx();
+            }
+            if (this.audioCtx && this.audioCtx.state === "suspended") {
+                this.audioCtx.resume();
+            }
+            return this.audioCtx;
+        }
+
+        playTone(freq = 440, duration = 0.08, type = "sine") {
+            try {
+                const ctx = this._getAudio();
+                if (!ctx) return;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, ctx.currentTime);
+                gain.gain.setValueAtTime(0.06, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + duration);
+            } catch (e) {
+                // Ignore audio sandbox restrictions
+            }
+        }
+
+        /* Click the Dot */
+        initDotGame() {
+            this.dotState.highScore = window.BiB.Storage.get("dot_highscore", 0);
+            this.renderDotScore();
+
+            const startBtn = document.getElementById("startDotBtn");
+            const arena = document.getElementById("dotArena");
+
+            if (startBtn) startBtn.addEventListener("click", () => this.startDotGame());
+            if (arena) {
+                arena.addEventListener("click", (e) => {
+                    if (!this.dotState.isRunning) return;
+                    if (!e.target.classList.contains("dot-target")) {
+                        this.dotState.combo = 0;
+                        this.renderDotScore();
+                    }
+                });
+            }
+        }
+
+        startDotGame() {
+            clearInterval(this.dotState.timerId);
+            this.dotState.score = 0;
+            this.dotState.combo = 0;
+            this.dotState.timeLeft = 30;
+            this.dotState.isRunning = true;
+            this.renderDotScore();
+
+            const arena = document.getElementById("dotArena");
+            if (!arena) return;
+
+            arena.innerHTML = "";
+            this.spawnDot();
+
+            this.dotState.timerId = setInterval(() => {
+                this.dotState.timeLeft--;
+                this.renderDotScore();
+                if (this.dotState.timeLeft <= 0) {
+                    this.endDotGame();
+                }
+            }, 1000);
+
+            this.playTone(520, 0.1, "sine");
+        }
+
+        spawnDot() {
+            const arena = document.getElementById("dotArena");
+            if (!arena || !this.dotState.isRunning) return;
+
+            arena.innerHTML = "";
+            const dot = document.createElement("div");
+            dot.className = "dot-target";
+
+            const size = Math.max(26, 40 - Math.min(this.dotState.combo, 8));
+            dot.style.position = "absolute";
+            dot.style.width = `${size}px`;
+            dot.style.height = `${size}px`;
+            dot.style.borderRadius = "50%";
+            dot.style.backgroundColor = "var(--color-accent)";
+            dot.style.cursor = "pointer";
+            dot.style.transition = "transform 60ms";
+
+            const maxX = arena.clientWidth - size - 12;
+            const maxY = arena.clientHeight - size - 12;
+            const x = Math.max(8, Math.floor(Math.random() * maxX));
+            const y = Math.max(8, Math.floor(Math.random() * maxY));
+
+            dot.style.left = `${x}px`;
+            dot.style.top = `${y}px`;
+
+            dot.addEventListener("click", (e) => {
+                e.stopPropagation();
+                if (!this.dotState.isRunning) return;
+                this.dotState.combo++;
+                this.dotState.score += (10 + this.dotState.combo * 2);
+                this.playTone(440 + this.dotState.combo * 30, 0.06, "sine");
+                this.renderDotScore();
+                this.spawnDot();
+            });
+
+            arena.appendChild(dot);
+        }
+
+        endDotGame() {
+            clearInterval(this.dotState.timerId);
+            this.dotState.isRunning = false;
+
+            if (this.dotState.score > this.dotState.highScore) {
+                this.dotState.highScore = this.dotState.score;
+                window.BiB.Storage.set("dot_highscore", this.dotState.highScore);
+            }
+
+            const arena = document.getElementById("dotArena");
+            if (arena) {
+                arena.innerHTML = `
+                    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;">
+                        <h4 style="font-size:18px;color:var(--color-text);">Round Finished</h4>
+                        <p style="font-size:14px;color:var(--color-text-secondary);">Score: <strong style="color:var(--color-accent);">${this.dotState.score}</strong> pts (Best: ${this.dotState.highScore})</p>
+                        <button class="btn btn-primary" id="retryDotBtn" style="margin-top:6px;">Play Again</button>
+                    </div>
+                `;
+                const retry = document.getElementById("retryDotBtn");
+                if (retry) retry.addEventListener("click", () => this.startDotGame());
+            }
+
+            this.renderDotScore();
+        }
+
+        renderDotScore() {
+            const scoreEl = document.getElementById("dotScore");
+            const timerEl = document.getElementById("dotTimer");
+            const bestEl = document.getElementById("dotBest");
+
+            if (scoreEl) scoreEl.textContent = this.dotState.score;
+            if (timerEl) timerEl.textContent = `${this.dotState.timeLeft}s`;
+            if (bestEl) bestEl.textContent = this.dotState.highScore;
+        }
+
+        /* Dino Runner */
+        initDinoGame() {
+            const canvas = document.getElementById("dinoCanvas");
+            if (!canvas) return;
+            this.dinoState.canvas = canvas;
+            this.dinoState.ctx = canvas.getContext("2d");
+            this.dinoState.highScore = window.BiB.Storage.get("dino_highscore", 0);
+
+            const startBtn = document.getElementById("startDinoBtn");
+            if (startBtn) startBtn.addEventListener("click", () => this.startDinoGame());
+
+            window.addEventListener("keydown", (e) => {
+                if (e.code === "Space" && document.getElementById("dinoCanvas")) {
+                    if (this.dinoState.isRunning) {
+                        e.preventDefault();
+                        this.jumpDino();
+                    }
                 }
             });
+
+            canvas.addEventListener("click", () => {
+                if (this.dinoState.isRunning) this.jumpDino();
+                else this.startDinoGame();
+            });
+
+            this.drawInitialDino();
         }
-    }
 
-    startDotGame() {
-        clearInterval(this.dotGame.timerId);
-        this.dotGame.score = 0;
-        this.dotGame.combo = 0;
-        this.dotGame.timeLeft = 30;
-        this.dotGame.isRunning = true;
-        this.updateDotScoreBoard();
+        drawInitialDino() {
+            const { ctx, canvas } = this.dinoState;
+            if (!ctx || !canvas) return;
 
-        const arena = document.getElementById('dotArena');
-        if (!arena) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#E5E5EA";
+            ctx.fillRect(0, 158, canvas.width, 2);
 
-        arena.innerHTML = '';
-        this.spawnDotTarget();
+            ctx.fillStyle = "#0071E3";
+            ctx.beginPath();
+            ctx.roundRect(40, 132, 22, 26, [3, 3, 1, 1]);
+            ctx.fill();
 
-        this.dotGame.timerId = setInterval(() => {
-            this.dotGame.timeLeft--;
-            this.updateDotScoreBoard();
+            ctx.fillStyle = "#86868B";
+            ctx.font = "13px -apple-system, sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("Press Space or Click to Jump", canvas.width / 2, 85);
+        }
 
-            if (this.dotGame.timeLeft <= 0) {
-                this.endDotGame();
-            }
-        }, 1000);
+        startDinoGame() {
+            cancelAnimationFrame(this.dinoState.animId);
+            this.dinoState.isRunning = true;
+            this.dinoState.score = 0;
+            this.dinoState.speed = 4.2;
+            this.dinoState.obstacles = [];
+            this.dinoState.spawnTimer = 0;
+            this.dinoState.dino = { x: 40, y: 132, w: 22, h: 26, vy: 0, isGrounded: true };
 
-        this.playBeep(520, 0.12, 'triangle');
-    }
+            this.playTone(580, 0.08, "sine");
+            this.loopDino();
+        }
 
-    spawnDotTarget() {
-        const arena = document.getElementById('dotArena');
-        if (!arena || !this.dotGame.isRunning) return;
-
-        arena.innerHTML = '';
-
-        const target = document.createElement('div');
-        target.className = 'dot-target game-dot-target';
-
-        const size = Math.max(24, 42 - Math.min(this.dotGame.combo, 10));
-        target.style.width = `${size}px`;
-        target.style.height = `${size}px`;
-
-        const maxX = arena.clientWidth - size - 10;
-        const maxY = arena.clientHeight - size - 10;
-
-        const posX = Math.max(10, Math.floor(Math.random() * maxX));
-        const posY = Math.max(10, Math.floor(Math.random() * maxY));
-
-        target.style.left = `${posX}px`;
-        target.style.top = `${posY}px`;
-
-        // Color variation based on combo
-        const hues = [340, 260, 200, 150, 45];
-        const hue = hues[this.dotGame.combo % hues.length];
-        target.style.background = `radial-gradient(circle, hsl(${hue}, 90%, 60%) 20%, hsl(${hue}, 90%, 40%) 100%)`;
-        target.style.boxShadow = `0 0 16px hsla(${hue}, 90%, 60%, 0.7)`;
-
-        target.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (!this.dotGame.isRunning) return;
-
-            this.dotGame.combo++;
-            const points = 10 + this.dotGame.combo * 2;
-            this.dotGame.score += points;
-
-            this.playBeep(440 + this.dotGame.combo * 30, 0.08, 'sine');
-            this.updateDotScoreBoard();
-            this.spawnDotTarget();
-        });
-
-        arena.appendChild(target);
-    }
-
-    endDotGame() {
-        clearInterval(this.dotGame.timerId);
-        this.dotGame.isRunning = false;
-
-        if (this.dotGame.score > this.dotGame.highScore) {
-            this.dotGame.highScore = this.dotGame.score;
-            window.storageManager.set('dot_highscore', this.dotGame.highScore);
-            if (window.notificationManager) {
-                window.notificationManager.show(`🎉 New Click the Dot Record: ${this.dotGame.highScore} pts!`, 'success');
+        jumpDino() {
+            if (this.dinoState.dino.isGrounded) {
+                this.dinoState.dino.vy = -11.5;
+                this.dinoState.dino.isGrounded = false;
+                this.playTone(360, 0.06, "square");
             }
         }
 
-        const arena = document.getElementById('dotArena');
-        if (arena) {
-            arena.innerHTML = `
-                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;text-align:center;">
-                    <h3 style="font-size:22px;color:var(--text-primary);">Time's Up! ⏱️</h3>
-                    <p style="font-size:16px;color:var(--text-secondary);">Final Score: <strong style="color:var(--accent);">${this.dotGame.score}</strong> points</p>
-                    <p style="font-size:13px;color:var(--text-muted);">Best: ${this.dotGame.highScore} points</p>
-                    <button id="retryDotBtn" class="bib-btn bib-btn-primary" style="margin-top:8px;">Play Again</button>
-                </div>
-            `;
-            const retryBtn = document.getElementById('retryDotBtn');
-            if (retryBtn) retryBtn.addEventListener('click', () => this.startDotGame());
-        }
+        loopDino() {
+            if (!this.dinoState.isRunning) return;
 
-        this.updateDotScoreBoard();
-    }
+            const { dino, canvas } = this.dinoState;
+            dino.vy += this.dinoState.gravity;
+            dino.y += dino.vy;
 
-    updateDotScoreBoard() {
-        const scoreEl = document.getElementById('dotScore');
-        const timerEl = document.getElementById('dotTimer');
-        const comboEl = document.getElementById('dotCombo');
-        const highEl = document.getElementById('dotHighScore');
+            if (dino.y >= 132) {
+                dino.y = 132;
+                dino.vy = 0;
+                dino.isGrounded = true;
+            }
 
-        if (scoreEl) scoreEl.textContent = this.dotGame.score;
-        if (timerEl) timerEl.textContent = `${this.dotGame.timeLeft}s`;
-        if (comboEl) comboEl.textContent = `${this.dotGame.combo}x`;
-        if (highEl) highEl.textContent = this.dotGame.highScore;
-    }
+            this.dinoState.score++;
+            if (this.dinoState.score % 250 === 0) {
+                this.dinoState.speed += 0.3;
+            }
 
-    /* ==========================================================================
-       Game 2: Browser Dino Runner
-       ========================================================================== */
-    initDinoGame() {
-        this.dinoGame.canvas = document.getElementById('dinoCanvas');
-        if (!this.dinoGame.canvas) return;
-        this.dinoGame.ctx = this.dinoGame.canvas.getContext('2d');
-        this.dinoGame.highScore = window.storageManager.get('dino_highscore', 0);
-
-        this.updateDinoScoreBoard();
-
-        const startBtn = document.getElementById('startDinoBtn');
-        if (startBtn) {
-            startBtn.addEventListener('click', () => this.startDinoGame());
-        }
-
-        // Spacebar or Click to jump
-        window.addEventListener('keydown', (e) => {
-            if (e.code === 'Space' && document.getElementById('dinoCanvas')) {
-                // Prevent scrolling page down
-                if (this.dinoGame.isRunning) {
-                    e.preventDefault();
-                    this.jumpDino();
+            this.dinoState.spawnTimer++;
+            if (this.dinoState.spawnTimer > 85) {
+                if (Math.random() > 0.35) {
+                    const h = 20 + Math.floor(Math.random() * 16);
+                    this.dinoState.obstacles.push({
+                        x: canvas.width + 10,
+                        y: 158 - h,
+                        w: 15,
+                        h: h
+                    });
+                    this.dinoState.spawnTimer = 0;
                 }
             }
-        });
 
-        this.dinoGame.canvas.addEventListener('click', () => {
-            if (this.dinoGame.isRunning) {
-                this.jumpDino();
-            } else {
-                this.startDinoGame();
-            }
-        });
+            for (let i = this.dinoState.obstacles.length - 1; i >= 0; i--) {
+                const obs = this.dinoState.obstacles[i];
+                obs.x -= this.dinoState.speed;
 
-        this.drawInitialDinoScreen();
-    }
+                // Collision
+                if (
+                    dino.x < obs.x + obs.w &&
+                    dino.x + dino.w > obs.x &&
+                    dino.y < obs.y + obs.h &&
+                    dino.y + dino.h > obs.y
+                ) {
+                    this.endDinoGame();
+                    return;
+                }
 
-    drawInitialDinoScreen() {
-        const { ctx, canvas } = this.dinoGame;
-        if (!ctx || !canvas) return;
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // Ground line
-        ctx.fillStyle = '#475569';
-        ctx.fillRect(0, 158, canvas.width, 2);
-
-        // Dino placeholder
-        ctx.fillStyle = '#6366f1';
-        ctx.fillRect(40, 130, 24, 28);
-
-        // Start prompt
-        ctx.fillStyle = '#94a3b8';
-        ctx.font = '14px -apple-system, BlinkMacSystemFont, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('Press SPACE or Click to Jump', canvas.width / 2, 85);
-    }
-
-    startDinoGame() {
-        cancelAnimationFrame(this.dinoGame.animId);
-        this.dinoGame.isRunning = true;
-        this.dinoGame.score = 0;
-        this.dinoGame.speed = 4.2;
-        this.dinoGame.spawnTimer = 0;
-        this.dinoGame.obstacles = [];
-        this.dinoGame.dino = { x: 40, y: 130, w: 24, h: 28, vy: 0, isGrounded: true };
-
-        this.playBeep(580, 0.1, 'sine');
-        this.loopDino();
-    }
-
-    jumpDino() {
-        if (this.dinoGame.dino.isGrounded) {
-            this.dinoGame.dino.vy = -11.5;
-            this.dinoGame.dino.isGrounded = false;
-            this.playBeep(380, 0.08, 'square');
-        }
-    }
-
-    loopDino() {
-        if (!this.dinoGame.isRunning) return;
-
-        this.updateDino();
-        this.renderDino();
-
-        this.dinoGame.animId = requestAnimationFrame(() => this.loopDino());
-    }
-
-    updateDino() {
-        const dino = this.dinoGame.dino;
-
-        // Apply physics
-        dino.vy += this.dinoGame.gravity;
-        dino.y += dino.vy;
-
-        // Ground constraint
-        if (dino.y >= 130) {
-            dino.y = 130;
-            dino.vy = 0;
-            dino.isGrounded = true;
-        }
-
-        // Increment score
-        this.dinoGame.score += 1;
-        if (this.dinoGame.score % 200 === 0) {
-            this.dinoGame.speed += 0.35; // Accelerate smoothly
-            this.playBeep(880, 0.1, 'sine');
-        }
-        this.updateDinoScoreBoard();
-
-        // Spawn obstacles
-        this.dinoGame.spawnTimer++;
-        if (this.dinoGame.spawnTimer > Math.max(45, 95 - Math.floor(this.dinoGame.speed * 4))) {
-            if (Math.random() > 0.3) {
-                const height = 22 + Math.floor(Math.random() * 18);
-                this.dinoGame.obstacles.push({
-                    x: this.dinoGame.canvas.width + 10,
-                    y: 158 - height,
-                    w: 16,
-                    h: height
-                });
-                this.dinoGame.spawnTimer = 0;
-            }
-        }
-
-        // Move obstacles and test collision
-        for (let i = this.dinoGame.obstacles.length - 1; i >= 0; i--) {
-            const obs = this.dinoGame.obstacles[i];
-            obs.x -= this.dinoGame.speed;
-
-            // Bounding box collision detection
-            if (
-                dino.x < obs.x + obs.w &&
-                dino.x + dino.w > obs.x &&
-                dino.y < obs.y + obs.h &&
-                dino.y + dino.h > obs.y
-            ) {
-                this.endDinoGame();
-                return;
+                if (obs.x + obs.w < -10) {
+                    this.dinoState.obstacles.splice(i, 1);
+                }
             }
 
-            // Remove off-screen obstacles
-            if (obs.x + obs.w < -10) {
-                this.dinoGame.obstacles.splice(i, 1);
-            }
-        }
-    }
-
-    renderDino() {
-        const { ctx, canvas, dino, obstacles } = this.dinoGame;
-        if (!ctx || !canvas) return;
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Ground
-        ctx.fillStyle = '#334155';
-        ctx.fillRect(0, 158, canvas.width, 2);
-
-        // Running ground tick marks
-        ctx.fillStyle = '#64748b';
-        const offset = (this.dinoGame.score * this.dinoGame.speed) % 30;
-        for (let x = -offset; x < canvas.width; x += 30) {
-            ctx.fillRect(x, 163, 12, 1.5);
+            this.renderDino();
+            this.dinoState.animId = requestAnimationFrame(() => this.loopDino());
         }
 
-        // Draw Dino
-        ctx.fillStyle = '#6366f1';
-        ctx.beginPath();
-        ctx.roundRect(dino.x, dino.y, dino.w, dino.h, [4, 4, 1, 1]);
-        ctx.fill();
+        renderDino() {
+            const { ctx, canvas, dino, obstacles } = this.dinoState;
+            if (!ctx || !canvas) return;
 
-        // Dino eye
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(dino.x + 16, dino.y + 4, 3, 3);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Draw Obstacles (Cacti)
-        ctx.fillStyle = '#10b981';
-        obstacles.forEach(obs => {
+            // Ground
+            ctx.fillStyle = "#E5E5EA";
+            ctx.fillRect(0, 158, canvas.width, 2);
+
+            // Dino
+            ctx.fillStyle = "#0071E3";
             ctx.beginPath();
-            ctx.roundRect(obs.x, obs.y, obs.w, obs.h, [3, 3, 0, 0]);
+            ctx.roundRect(dino.x, dino.y, dino.w, dino.h, [3, 3, 1, 1]);
             ctx.fill();
-        });
-    }
 
-    endDinoGame() {
-        this.dinoGame.isRunning = false;
-        cancelAnimationFrame(this.dinoGame.animId);
-        this.playBeep(160, 0.25, 'sawtooth');
+            // Obstacles
+            ctx.fillStyle = "#34C759";
+            obstacles.forEach(o => {
+                ctx.beginPath();
+                ctx.roundRect(o.x, o.y, o.w, o.h, [2, 2, 0, 0]);
+                ctx.fill();
+            });
 
-        if (this.dinoGame.score > this.dinoGame.highScore) {
-            this.dinoGame.highScore = this.dinoGame.score;
-            window.storageManager.set('dino_highscore', this.dinoGame.highScore);
-            if (window.notificationManager) {
-                window.notificationManager.show(`🦖 New Dino High Score: ${this.dinoGame.highScore}!`, 'success');
+            // Score counter in canvas top-right
+            ctx.fillStyle = "#86868B";
+            ctx.font = "12px -apple-system, sans-serif";
+            ctx.textAlign = "right";
+            ctx.fillText(`${this.dinoState.score}`, canvas.width - 16, 24);
+        }
+
+        endDinoGame() {
+            this.dinoState.isRunning = false;
+            cancelAnimationFrame(this.dinoState.animId);
+            this.playTone(180, 0.2, "sawtooth");
+
+            if (this.dinoState.score > this.dinoState.highScore) {
+                this.dinoState.highScore = this.dinoState.score;
+                window.BiB.Storage.set("dino_highscore", this.dinoState.highScore);
+            }
+
+            const { ctx, canvas } = this.dinoState;
+            if (ctx && canvas) {
+                ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = "#1D1D1F";
+                ctx.font = "bold 18px -apple-system, sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText("Game Over", canvas.width / 2, 75);
+
+                ctx.fillStyle = "#6E6E73";
+                ctx.font = "13px -apple-system, sans-serif";
+                ctx.fillText(`Score: ${this.dinoState.score} • Best: ${this.dinoState.highScore}`, canvas.width / 2, 102);
+
+                ctx.fillStyle = "#0071E3";
+                ctx.font = "12px -apple-system, sans-serif";
+                ctx.fillText("Click canvas to restart", canvas.width / 2, 130);
             }
         }
-
-        const { ctx, canvas } = this.dinoGame;
-        if (ctx && canvas) {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            ctx.fillStyle = '#f87171';
-            ctx.font = 'bold 20px -apple-system, BlinkMacSystemFont, sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('GAME OVER', canvas.width / 2, 75);
-
-            ctx.fillStyle = '#ffffff';
-            ctx.font = '14px -apple-system, BlinkMacSystemFont, sans-serif';
-            ctx.fillText(`Score: ${this.dinoGame.score}   •   Best: ${this.dinoGame.highScore}`, canvas.width / 2, 105);
-
-            ctx.fillStyle = '#94a3b8';
-            ctx.font = '12px -apple-system, BlinkMacSystemFont, sans-serif';
-            ctx.fillText('Click canvas to restart', canvas.width / 2, 130);
-        }
-
-        this.updateDinoScoreBoard();
     }
 
-    updateDinoScoreBoard() {
-        const scoreEl = document.getElementById('dinoScore');
-        const highEl = document.getElementById('dinoHighScore');
-        if (scoreEl) scoreEl.textContent = this.dinoGame.score;
-        if (highEl) highEl.textContent = this.dinoGame.highScore;
-    }
-}
-
-// Export singleton instance
-window.miniGamesManager = new MiniGamesManager();
+    window.BiB = window.BiB || {};
+    window.BiB.Games = new GamesManager();
+})(window);

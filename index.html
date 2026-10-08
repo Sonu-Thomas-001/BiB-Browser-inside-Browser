@@ -24,8 +24,8 @@
             if ('caches' in window) {
                 caches.keys().then(keys => {
                     for (let key of keys) {
-                        if (key === 'bib-v2-cache-v1') {
-                            caches.delete(key).then(() => console.log('[BiB] Purged stale v1 cache'));
+                        if (key.startsWith('bib-') && key !== 'bib-v3-cache-v1') {
+                            caches.delete(key).then(() => console.log('[BiB] Purged stale cache:', key));
                         }
                     }
                 });
@@ -42,15 +42,16 @@
         })();
     </script>
 
-    <!-- Stylesheets (Tokens, Base, Components, Chrome, Pages, Animations, Themes, Responsive) -->
-    <link rel="stylesheet" href="./css/tokens.css?v=2.0.2">
-    <link rel="stylesheet" href="./css/base.css?v=2.0.2">
-    <link rel="stylesheet" href="./css/components.css?v=2.0.2">
-    <link rel="stylesheet" href="./css/browser.css?v=2.0.2">
-    <link rel="stylesheet" href="./css/pages.css?v=2.0.2">
-    <link rel="stylesheet" href="./css/animations.css?v=2.0.2">
-    <link rel="stylesheet" href="./css/themes.css?v=2.0.2">
-    <link rel="stylesheet" href="./css/responsive.css?v=2.0.2">
+    <!-- Stylesheets (Tokens, Base, Components, Chrome, Pages, Glass, Animations, Themes, Responsive) -->
+    <link rel="stylesheet" href="./css/tokens.css?v=3.0.0">
+    <link rel="stylesheet" href="./css/base.css?v=3.0.0">
+    <link rel="stylesheet" href="./css/components.css?v=3.0.0">
+    <link rel="stylesheet" href="./css/browser.css?v=3.0.0">
+    <link rel="stylesheet" href="./css/pages.css?v=3.0.0">
+    <link rel="stylesheet" href="./css/glass.css?v=3.0.0">
+    <link rel="stylesheet" href="./css/animations.css?v=3.0.0">
+    <link rel="stylesheet" href="./css/themes.css?v=3.0.0">
+    <link rel="stylesheet" href="./css/responsive.css?v=3.0.0">
 
     <!-- Inline SVG Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23F5F5F7'/><rect x='15' y='15' width='70' height='70' rx='14' fill='%23FFFFFF' stroke='%230071E3' stroke-width='4'/><circle cx='30' cy='30' r='3.5' fill='%23FF5F57'/><circle cx='40' cy='30' r='3.5' fill='%23FEBC2E'/><circle cx='50' cy='30' r='3.5' fill='%2328C840'/></svg>">
@@ -137,6 +138,12 @@
 
                 <!-- Right Toolbar Actions -->
                 <div class="toolbar-nav-group">
+                    <button class="btn-icon split-btn" aria-label="Split View" title="Toggle Split View (⌥S)">
+                        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="3" y="3" width="14" height="14" rx="2.5"/><path d="M10 3v14"/></svg>
+                    </button>
+                    <button class="btn-icon command-btn" aria-label="Command Palette" title="Command Palette (⌘K)">
+                        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M14 6a2 2 0 1 0-2-2v12a2 2 0 1 0 2-2H6a2 2 0 1 0 2 2V4a2 2 0 1 0-2 2h8z"/></svg>
+                    </button>
                     <button class="btn-icon share-btn" aria-label="Share page" title="Share Page">
                         <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="15" cy="5" r="2.5"/><circle cx="5" cy="10" r="2.5"/><circle cx="15" cy="15" r="2.5"/><line x1="7.2" y1="8.9" x2="12.8" y2="6.1"/><line x1="7.2" y1="11.1" x2="12.8" y2="13.9"/></svg>
                     </button>
@@ -173,7 +180,13 @@
 
                 <!-- Active Page Container -->
                 <div class="page-container" tabindex="0"></div>
+
+                <!-- Link Hover Bottom-Left Status -->
+                <div class="link-hover-status" id="linkHoverStatus"></div>
             </section>
+
+            <!-- Mini Windows Floating OS Layer -->
+            <div class="bib-windows-layer" id="bibWindowsLayer"></div>
 
             <!-- Status Bar -->
             <footer class="window-status">
@@ -284,26 +297,34 @@
     </div>
 
     <!-- Vanilla JS Modules (Strict mode, modular dependency order) -->
-    <script src="./js/utils.js?v=2.0.2"></script>
-    <script src="./js/storage.js?v=2.0.2"></script>
-    <script src="./js/indexeddb.js?v=2.0.2"></script>
-    <script src="./js/notifications.js?v=2.0.2"></script>
-    <script src="./js/themes.js?v=2.0.2"></script>
-    <script src="./js/fullscreen.js?v=2.0.2"></script>
-    <script src="./js/share.js?v=2.0.2"></script>
-    <script src="./js/downloads.js?v=2.0.2"></script>
-    <script src="./js/history.js?v=2.0.2"></script>
-    <script src="./js/bookmarks.js?v=2.0.2"></script>
-    <script src="./js/search.js?v=2.0.2"></script>
-    <script src="./js/settings.js?v=2.0.2"></script>
-    <script src="./js/keyboard.js?v=2.0.2"></script>
-    <script src="./js/context-menu.js?v=2.0.2"></script>
-    <script src="./js/games.js?v=2.0.2"></script>
-    <script src="./js/developer-tools.js?v=2.0.2"></script>
-    <script src="./js/renderer.js?v=2.0.2"></script>
-    <script src="./js/tabs.js?v=2.0.2"></script>
-    <script src="./js/navigation.js?v=2.0.2"></script>
-    <script src="./js/browser.js?v=2.0.2"></script>
-    <script src="./js/app.js?v=2.0.2"></script>
+    <script src="./js/utils.js?v=3.0.0"></script>
+    <script src="./js/storage.js?v=3.0.0"></script>
+    <script src="./js/indexeddb.js?v=3.0.0"></script>
+    <script src="./js/experiments.js?v=3.0.0"></script>
+    <script src="./js/notifications.js?v=3.0.0"></script>
+    <script src="./js/themes.js?v=3.0.0"></script>
+    <script src="./js/fullscreen.js?v=3.0.0"></script>
+    <script src="./js/share.js?v=3.0.0"></script>
+    <script src="./js/downloads.js?v=3.0.0"></script>
+    <script src="./js/history.js?v=3.0.0"></script>
+    <script src="./js/bookmarks.js?v=3.0.0"></script>
+    <script src="./js/reading-list.js?v=3.0.0"></script>
+    <script src="./js/search.js?v=3.0.0"></script>
+    <script src="./js/settings.js?v=3.0.0"></script>
+    <script src="./js/commands.js?v=3.0.0"></script>
+    <script src="./js/keyboard.js?v=3.0.0"></script>
+    <script src="./js/context-menu.js?v=3.0.0"></script>
+    <script src="./js/games.js?v=3.0.0"></script>
+    <script src="./js/developer-tools.js?v=3.0.0"></script>
+    <script src="./js/webview.js?v=3.0.0"></script>
+    <script src="./js/reader.js?v=3.0.0"></script>
+    <script src="./js/file-viewer.js?v=3.0.0"></script>
+    <script src="./js/split-view.js?v=3.0.0"></script>
+    <script src="./js/window-manager.js?v=3.0.0"></script>
+    <script src="./js/renderer.js?v=3.0.0"></script>
+    <script src="./js/tabs.js?v=3.0.0"></script>
+    <script src="./js/navigation.js?v=3.0.0"></script>
+    <script src="./js/browser.js?v=3.0.0"></script>
+    <script src="./js/app.js?v=3.0.0"></script>
 </body>
 </html>

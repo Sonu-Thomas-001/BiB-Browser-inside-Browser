@@ -3,7 +3,7 @@
  * Relative scope caching compatible with GitHub Pages
  */
 
-const CACHE_NAME = "bib-v2-cache-v2";
+const CACHE_NAME = "bib-v3-cache-v1";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
@@ -13,12 +13,14 @@ const ASSETS_TO_CACHE = [
   "./css/browser.css",
   "./css/pages.css",
   "./css/components.css",
+  "./css/glass.css",
   "./css/animations.css",
   "./css/themes.css",
   "./css/responsive.css",
   "./js/utils.js",
   "./js/storage.js",
   "./js/indexeddb.js",
+  "./js/experiments.js",
   "./js/notifications.js",
   "./js/themes.js",
   "./js/fullscreen.js",
@@ -26,12 +28,19 @@ const ASSETS_TO_CACHE = [
   "./js/downloads.js",
   "./js/history.js",
   "./js/bookmarks.js",
+  "./js/reading-list.js",
   "./js/search.js",
   "./js/settings.js",
+  "./js/commands.js",
   "./js/keyboard.js",
   "./js/context-menu.js",
   "./js/games.js",
   "./js/developer-tools.js",
+  "./js/webview.js",
+  "./js/reader.js",
+  "./js/file-viewer.js",
+  "./js/split-view.js",
+  "./js/window-manager.js",
   "./js/renderer.js",
   "./js/tabs.js",
   "./js/navigation.js",

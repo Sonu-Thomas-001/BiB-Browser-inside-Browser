@@ -1,0 +1,444 @@
+/**
+ * BiB 2.0 — Internal Pages Styles
+ * Apple.com + Safari Start Page aesthetic
+ */
+
+/* ==========================================================================
+   Common Page Container
+   ========================================================================== */
+
+.page-wrapper {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: var(--space-8) var(--space-6) var(--space-12);
+}
+
+.page-header {
+    margin-bottom: var(--space-8);
+}
+
+.page-title {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--color-text);
+    margin-bottom: var(--space-2);
+}
+
+.page-subtitle {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+}
+
+/* ==========================================================================
+   Start Page (bib://home & New Tab Page)
+   ========================================================================== */
+
+.start-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 80%;
+    padding: var(--space-10) var(--space-6);
+    text-align: center;
+}
+
+.start-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius-xl);
+    background-color: var(--color-surface-secondary);
+    border: 1px solid var(--color-border);
+    margin-bottom: var(--space-4);
+    box-shadow: var(--shadow-sm);
+}
+
+.start-logo svg {
+    width: 32px;
+    height: 32px;
+    stroke: var(--color-accent);
+}
+
+.start-title {
+    font-size: 34px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--color-text);
+    margin-bottom: var(--space-1);
+}
+
+.start-subtitle {
+    font-size: 15px;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-8);
+    max-width: 440px;
+}
+
+.start-search-box {
+    width: 100%;
+    max-width: 520px;
+    height: 44px;
+    background-color: var(--color-surface-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: var(--space-3);
+    margin-bottom: var(--space-10);
+    box-shadow: var(--shadow-sm);
+    transition: background-color var(--duration-fast), border-color var(--duration-fast), box-shadow var(--duration-fast);
+}
+
+.start-search-box:focus-within {
+    background-color: var(--color-surface);
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-accent-subtle);
+}
+
+.start-search-input {
+    flex: 1;
+    height: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    color: var(--color-text);
+}
+
+/* Minimal Favorites Grid */
+.favorites-section {
+    width: 100%;
+    max-width: 640px;
+    margin-bottom: var(--space-10);
+}
+
+.section-label {
+    font-size: 11.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-tertiary);
+    margin-bottom: var(--space-4);
+    text-align: left;
+}
+
+.favorites-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
+    gap: var(--space-4);
+}
+
+.favorite-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    cursor: pointer;
+    text-decoration: none;
+    padding: 8px 4px;
+    border-radius: var(--radius-md);
+    transition: background-color var(--duration-fast), transform var(--duration-fast);
+}
+
+.favorite-item:hover {
+    background-color: var(--color-surface-hover);
+    transform: translateY(-2px);
+}
+
+.favorite-icon-box {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-lg);
+    background-color: var(--color-surface-secondary);
+    border: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow var(--duration-fast), transform var(--duration-fast);
+}
+
+.favorite-item:hover .favorite-icon-box {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.favorite-icon-box svg {
+    width: 22px;
+    height: 22px;
+    stroke: var(--color-text);
+}
+
+.favorite-title {
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--color-text);
+}
+
+/* Recent Visits List */
+.recent-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+    max-width: 640px;
+}
+
+.recent-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    cursor: pointer;
+    text-align: left;
+    transition: background-color var(--duration-fast), border-color var(--duration-fast);
+}
+
+.recent-row:hover {
+    background-color: var(--color-surface-hover);
+    border-color: var(--color-border-strong);
+}
+
+.recent-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text);
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.recent-url {
+    font-size: 11.5px;
+    color: var(--color-text-tertiary);
+}
+
+/* ==========================================================================
+   Settings Page (Apple System Settings Layout)
+   ========================================================================== */
+
+.settings-layout {
+    display: flex;
+    gap: var(--space-8);
+    max-width: 900px;
+    margin: 0 auto;
+    padding: var(--space-6);
+}
+
+.settings-sidebar {
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.settings-nav-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    border: none;
+    background: transparent;
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: left;
+    transition: background-color var(--duration-fast);
+}
+
+.settings-nav-item:hover {
+    background-color: var(--color-surface-hover);
+}
+
+.settings-nav-item.is-active {
+    background-color: var(--color-accent);
+    color: #FFFFFF;
+}
+
+.settings-nav-item.is-active svg {
+    stroke: #FFFFFF;
+}
+
+.settings-content {
+    flex: 1;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-card);
+}
+
+.settings-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    margin-bottom: var(--space-8);
+}
+
+.settings-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.settings-label-title {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--color-text);
+}
+
+.settings-label-desc {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    margin-top: 2px;
+}
+
+/* ==========================================================================
+   Developer Tools Page (bib://developer)
+   ========================================================================== */
+
+.devtools-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-surface);
+    font-family: var(--font-mono);
+}
+
+.devtools-tabs {
+    display: flex;
+    align-items: center;
+    background-color: var(--color-surface-secondary);
+    border-bottom: 1px solid var(--color-border);
+    padding: 0 10px;
+    gap: 2px;
+}
+
+.dt-tab-btn {
+    padding: 7px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color var(--duration-fast);
+}
+
+.dt-tab-btn:hover {
+    color: var(--color-text);
+}
+
+.dt-tab-btn.is-active {
+    color: var(--color-accent);
+    border-bottom-color: var(--color-accent);
+}
+
+.dt-panel {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--space-4);
+}
+
+.terminal-box {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 12.5px;
+    line-height: 1.5;
+}
+
+.terminal-line {
+    word-break: break-all;
+}
+
+.terminal-line.cmd { color: var(--color-accent); font-weight: 600; }
+.terminal-line.success { color: var(--color-success); }
+.terminal-line.error { color: var(--color-danger); }
+.terminal-line.info { color: var(--color-text-secondary); }
+
+.terminal-prompt-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+}
+
+.terminal-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--color-text);
+}
+
+/* ==========================================================================
+   Reader Mode (Safari-style clean reading experience)
+   ========================================================================== */
+
+.reader-container {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+    font-family: -apple-system, BlinkMacSystemFont, "Palatino", "Georgia", serif;
+    color: #222222;
+    line-height: 1.75;
+}
+
+.reader-headline {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+    line-height: 1.25;
+}
+
+.reader-byline {
+    font-size: 13px;
+    color: #777777;
+    margin-bottom: 32px;
+    font-family: var(--font-sans);
+}
+
+.reader-body p {
+    font-size: 17px;
+    margin-bottom: 22px;
+}
+
+/* Fallback Card for Non-Embeddable Sites */
+.embed-fallback-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 400px;
+    text-align: center;
+    padding: var(--space-8);
+}
+
+.embed-fallback-card svg {
+    width: 44px;
+    height: 44px;
+    stroke: var(--color-text-tertiary);
+    margin-bottom: var(--space-4);
+}

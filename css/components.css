@@ -1,0 +1,388 @@
+/**
+ * BiB 2.0 — Component Styles
+ * Apple-style buttons, modals, toasts, popovers, and find bar
+ */
+
+/* ==========================================================================
+   Buttons & Controls
+   ========================================================================== */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1;
+    border-radius: var(--radius-md);
+    padding: 7px 14px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background-color var(--duration-fast), transform var(--duration-fast), border-color var(--duration-fast), box-shadow var(--duration-fast);
+}
+
+.btn:active {
+    transform: scale(0.97);
+}
+
+.btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+    pointer-events: none;
+}
+
+.btn-primary {
+    background-color: var(--color-accent);
+    color: var(--color-accent-text);
+}
+
+.btn-primary:hover {
+    background-color: var(--color-accent-hover);
+}
+
+.btn-secondary {
+    background-color: var(--color-surface-secondary);
+    color: var(--color-text);
+    border-color: var(--color-border);
+}
+
+.btn-secondary:hover {
+    background-color: var(--color-surface-tertiary);
+    border-color: var(--color-border-strong);
+}
+
+.btn-danger {
+    background-color: rgba(255, 59, 48, 0.1);
+    color: var(--color-danger);
+    border-color: rgba(255, 59, 48, 0.2);
+}
+
+.btn-danger:hover {
+    background-color: rgba(255, 59, 48, 0.16);
+}
+
+/* Icon Buttons (Toolbar, Header, Status) */
+.btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    border: none;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: background-color var(--duration-fast), color var(--duration-fast), transform var(--duration-fast);
+}
+
+.btn-icon:hover {
+    background-color: var(--color-surface-hover);
+    color: var(--color-text);
+}
+
+.btn-icon:active {
+    transform: scale(0.94);
+    background-color: var(--color-surface-active);
+}
+
+.btn-icon:disabled {
+    opacity: 0.3;
+    cursor: default;
+    pointer-events: none;
+}
+
+.btn-icon svg {
+    width: 17px;
+    height: 17px;
+}
+
+/* ==========================================================================
+   Modals & Dialogs (Apple-style clean surface & blur)
+   ========================================================================== */
+
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: var(--space-4);
+}
+
+.modal-backdrop.is-open {
+    display: flex;
+}
+
+.modal-dialog {
+    width: 100%;
+    max-width: 480px;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-popover);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    padding: var(--space-5) var(--space-6);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.modal-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-text);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.modal-body {
+    padding: var(--space-6);
+    font-size: 13.5px;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+    overflow-y: auto;
+    max-height: 70vh;
+}
+
+.modal-footer {
+    padding: var(--space-4) var(--space-6);
+    background-color: var(--color-surface-secondary);
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-3);
+}
+
+/* ==========================================================================
+   Toast Notifications (Clean Floating Pills)
+   ========================================================================== */
+
+.toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    z-index: 99999;
+    pointer-events: none;
+}
+
+.toast {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: 10px 16px;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    box-shadow: var(--shadow-popover);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text);
+    pointer-events: auto;
+    cursor: pointer;
+    min-width: 200px;
+    max-width: 380px;
+    transition: transform var(--duration-fast), opacity var(--duration-fast);
+}
+
+.toast-icon {
+    display: flex;
+    align-items: center;
+    color: var(--color-accent);
+}
+
+.toast-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+.toast-message {
+    flex: 1;
+}
+
+/* ==========================================================================
+   Find In Page Bar (Ctrl/Cmd + F)
+   ========================================================================== */
+
+.find-bar {
+    position: absolute;
+    top: calc(var(--window-header-height) + var(--window-toolbar-height) + 8px);
+    right: 20px;
+    display: none;
+    align-items: center;
+    gap: var(--space-2);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-popover);
+    padding: 5px 8px;
+    z-index: 1000;
+}
+
+.find-bar.is-visible {
+    display: flex;
+}
+
+.find-input {
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    color: var(--color-text);
+    width: 180px;
+}
+
+.find-count {
+    font-size: 11.5px;
+    color: var(--color-text-tertiary);
+    min-width: 38px;
+    text-align: center;
+}
+
+/* ==========================================================================
+   Tab Hover Preview Card
+   ========================================================================== */
+
+.tab-hover-preview {
+    position: fixed;
+    pointer-events: none;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-popover);
+    padding: var(--space-3);
+    width: 220px;
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    z-index: 2000;
+}
+
+.tab-hover-preview.is-visible {
+    display: flex;
+}
+
+.tab-preview-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tab-preview-url {
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tab-preview-thumb {
+    width: 100%;
+    height: 70px;
+    background-color: var(--color-surface-secondary);
+    border-radius: var(--radius-sm);
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-tertiary);
+    font-size: 11px;
+}
+
+/* ==========================================================================
+   Context Menus & Dropdowns
+   ========================================================================== */
+
+.context-menu,
+.dropdown-menu {
+    position: fixed;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-popover);
+    padding: 4px;
+    min-width: 180px;
+    display: none;
+    flex-direction: column;
+    z-index: 9999;
+}
+
+.context-menu.is-visible,
+.dropdown-menu.is-open {
+    display: flex;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    color: var(--color-text);
+    font-size: 12.5px;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    width: 100%;
+    text-align: left;
+    transition: background-color var(--duration-fast);
+}
+
+.menu-item:hover {
+    background-color: var(--color-accent);
+    color: #FFFFFF;
+}
+
+.menu-item:hover .menu-shortcut {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.menu-item:hover svg {
+    stroke: #FFFFFF;
+}
+
+.menu-left {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.menu-left svg {
+    width: 15px;
+    height: 15px;
+    stroke: var(--color-text-secondary);
+}
+
+.menu-shortcut {
+    font-size: 11px;
+    color: var(--color-text-tertiary);
+    font-family: var(--font-sans);
+}
+
+.menu-divider {
+    height: 1px;
+    background-color: var(--color-border-subtle);
+    margin: 4px 0;
+}

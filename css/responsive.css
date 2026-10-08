@@ -1,92 +1,26 @@
-/* ==========================================================================
-   BiB (Browser inside Browser) — Responsive Styles
-   ========================================================================== */
+/**
+ * BiB 2.0 — Responsive Layout Styles
+ * Desktop, tablet, and Apple-style bottom-bar mobile browser experience
+ */
 
-/* Medium Desktops and Laptops */
+/* Medium Desktops & Laptops */
 @media (max-width: 1024px) {
     .desktop-workspace {
-        padding: 12px;
-    }
-    
-    .browser-window {
-        height: calc(100vh - 24px);
-    }
-    
-    .tab {
-        min-width: 90px;
-        max-width: 160px;
+        padding: var(--space-2);
     }
 
-    .titlebar-badge {
-        display: none;
+    .browser-window {
+        height: calc(100vh - 16px);
+    }
+
+    .tab {
+        min-width: 90px;
+        max-width: 150px;
     }
 }
 
-/* Tablet Screens */
+/* Tablets (<768px) */
 @media (max-width: 768px) {
-    .desktop-workspace {
-        padding: 6px;
-    }
-
-    .browser-window {
-        height: calc(100vh - 12px);
-        border-radius: var(--radius-md);
-    }
-
-    .window-titlebar {
-        padding: 0 6px 0 10px;
-        gap: 8px;
-    }
-
-    .tab {
-        min-width: 70px;
-        max-width: 130px;
-        font-size: 11.5px;
-        padding: 0 6px;
-    }
-
-    .tab-favicon {
-        margin-right: 4px;
-    }
-
-    .toolbar {
-        padding: 0 6px;
-        gap: 4px;
-    }
-
-    .toolbar-btn {
-        width: 28px;
-        height: 28px;
-    }
-
-    .toolbar-btn svg {
-        width: 15px;
-        height: 15px;
-    }
-
-    /* Hide secondary buttons on compact screens */
-    .btn-forward,
-    .btn-home,
-    .devtools-btn,
-    .downloads-btn {
-        display: none !important;
-    }
-
-    .status-link-hover {
-        max-width: 180px;
-    }
-
-    .card-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .home-hero-title {
-        font-size: 32px;
-    }
-}
-
-/* Mobile Screens */
-@media (max-width: 480px) {
     .desktop-workspace {
         padding: 0;
     }
@@ -100,51 +34,76 @@
         border: none;
     }
 
-    .window-controls {
-        gap: 6px;
+    .settings-layout {
+        flex-direction: column;
     }
 
-    .control-btn {
-        width: 10px;
-        height: 10px;
+    .settings-sidebar {
+        width: 100%;
+        flex-direction: row;
+        overflow-x: auto;
+    }
+}
+
+/* Mobile Screens (<600px): Transforms to Safari iOS Style */
+@media (max-width: 600px) {
+    .window-header {
+        display: none; /* Tabs collapse into mobile tabs modal or bottom bar */
     }
 
-    .tab {
-        min-width: 50px;
-        max-width: 95px;
-    }
-
-    .tab-close {
-        display: none; /* Tap tab to activate on phone */
-    }
-
-    .bookmark-bar {
-        display: none; /* Hide bookmark bar on small mobile */
-    }
-
-    .status-bar {
-        font-size: 10px;
-        padding: 0 8px;
-    }
-
-    .status-ram {
+    .window-status {
         display: none;
     }
 
-    .home-hero-title {
+    .window-toolbar {
+        padding: 0 8px;
+    }
+
+    .toolbar-nav-group {
+        display: none; /* Handled in mobile bottom bar */
+    }
+
+    /* Mobile Bottom Navigation Bar */
+    .mobile-bottom-nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        height: 48px;
+        background-color: var(--color-surface);
+        border-top: 1px solid var(--color-border);
+        flex-shrink: 0;
+        z-index: 100;
+    }
+
+    .mobile-nav-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        border: none;
+        color: var(--color-text-secondary);
+        font-size: 10px;
+        gap: 2px;
+        cursor: pointer;
+    }
+
+    .mobile-nav-btn svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .start-title {
         font-size: 26px;
     }
 
-    .home-hero-desc {
-        font-size: 14px;
-    }
-
-    .quick-tiles-grid {
+    .favorites-grid {
         grid-template-columns: repeat(3, 1fr);
-        gap: 8px;
     }
+}
 
-    .modal-card {
-        max-width: 95vw;
+@media (min-width: 601px) {
+    .mobile-bottom-nav {
+        display: none !important;
     }
 }

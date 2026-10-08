@@ -1,144 +1,167 @@
 /**
- * BiB (Browser inside Browser) — Keyboard Shortcuts Manager
- * Intercepts shortcuts for simulated browser actions & Easter eggs
+ * BiB 2.0 — Keyboard Shortcuts & Konami Easter Egg
  */
 
-class KeyboardManager {
-    constructor() {
-        this.konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
-        this.konamiProgress = 0;
-        this.init();
-    }
+"use strict";
 
-    init() {
-        window.addEventListener('keydown', (e) => this.handleKeyDown(e));
-    }
-
-    handleKeyDown(e) {
-        // Handle Konami code detection
-        this.checkKonami(e.key);
-
-        const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
-        const ctrlOrCmd = isMac ? e.metaKey : e.ctrlKey;
-
-        // Escape: Close dropdowns, context menus, modals
-        if (e.key === 'Escape') {
-            window.dispatchEvent(new CustomEvent('bib:close-overlays'));
-            return;
+(function (window) {
+    class KeyboardManager {
+        constructor() {
+            this.konamiCode = ["ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown", "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight", "b", "a"];
+            this.konamiIndex = 0;
+            this.init();
         }
 
-        // Ctrl/Cmd + Shift + T: Reopen closed tab
-        if (ctrlOrCmd && e.shiftKey && (e.key === 'T' || e.key === 't')) {
-            e.preventDefault();
-            if (window.tabManager) {
-                window.tabManager.reopenClosedTab();
+        init() {
+            window.addEventListener("keydown", (e) => this.handleKeyDown(e));
+        }
+
+        handleKeyDown(e) {
+            this.checkKonami(e.key);
+
+            const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
+            const ctrlOrCmd = isMac ? e.metaKey : e.ctrlKey;
+
+            // Escape: Dismiss overlays, modals, find bar
+            if (e.key === "Escape") {
+                window.dispatchEvent(new CustomEvent("bib:close-overlays"));
+                return;
             }
-            return;
-        }
 
-        // Ctrl/Cmd + Shift + B: Toggle bookmark bar
-        if (ctrlOrCmd && e.shiftKey && (e.key === 'B' || e.key === 'b')) {
-            e.preventDefault();
-            if (window.browserApp) {
-                window.browserApp.toggleBookmarkBar();
+            // Find in Page: Ctrl/Cmd + F
+            if (ctrlOrCmd && (e.key === "f" || e.key === "F")) {
+                e.preventDefault();
+                window.dispatchEvent(new CustomEvent("bib:toggle-find"));
+                return;
             }
-            return;
-        }
 
-        // Ctrl/Cmd + T: New tab
-        if (ctrlOrCmd && !e.shiftKey && (e.key === 't' || e.key === 'T')) {
-            e.preventDefault();
-            if (window.tabManager) {
-                window.tabManager.createTab('bib://welcome');
-            }
-            return;
-        }
-
-        // Ctrl/Cmd + W: Close active tab
-        if (ctrlOrCmd && (e.key === 'w' || e.key === 'W')) {
-            e.preventDefault();
-            if (window.tabManager && window.tabManager.activeTabId) {
-                window.tabManager.closeTab(window.tabManager.activeTabId);
-            }
-            return;
-        }
-
-        // Ctrl/Cmd + L: Focus address bar
-        if (ctrlOrCmd && (e.key === 'l' || e.key === 'L')) {
-            e.preventDefault();
-            const urlInput = document.querySelector('.url-input');
-            if (urlInput) {
-                urlInput.focus();
-                urlInput.select();
-            }
-            return;
-        }
-
-        // Ctrl/Cmd + R: Reload active tab
-        if (ctrlOrCmd && (e.key === 'r' || e.key === 'R')) {
-            e.preventDefault();
-            if (window.navigationEngine) {
-                window.navigationEngine.reload();
-            }
-            return;
-        }
-
-        // Ctrl/Cmd + D: Bookmark current page
-        if (ctrlOrCmd && (e.key === 'd' || e.key === 'D')) {
-            e.preventDefault();
-            if (window.bookmarksManager && window.tabManager) {
-                const activeTab = window.tabManager.getActiveTab();
-                if (activeTab) {
-                    window.bookmarksManager.toggleBookmark(activeTab);
+            // Reopen closed tab: Ctrl/Cmd + Shift + T
+            if (ctrlOrCmd && e.shiftKey && (e.key === "t" || e.key === "T")) {
+                e.preventDefault();
+                if (window.BiB && window.BiB.Tabs) {
+                    window.BiB.Tabs.reopenClosedTab();
                 }
+                return;
             }
-            return;
+
+            // Toggle bookmark bar: Ctrl/Cmd + Shift + B
+            if (ctrlOrCmd && e.shiftKey && (e.key === "b" || e.key === "B")) {
+                e.preventDefault();
+                if (window.BiB && window.BiB.Browser) {
+                    window.BiB.Browser.toggleBookmarkBar();
+                }
+                return;
+            }
+
+            // New Tab: Ctrl/Cmd + T
+            if (ctrlOrCmd && !e.shiftKey && (e.key === "t" || e.key === "T")) {
+                e.preventDefault();
+                if (window.BiB && window.BiB.Tabs) {
+                    window.BiB.Tabs.createTab("bib://home");
+                }
+                return;
+            }
+
+            // Close Tab: Ctrl/Cmd + W
+            if (ctrlOrCmd && (e.key === "w" || e.key === "W")) {
+                e.preventDefault();
+                if (window.BiB && window.BiB.Tabs && window.BiB.Tabs.activeTabId) {
+                    window.BiB.Tabs.closeTab(window.BiB.Tabs.activeTabId);
+                }
+                return;
+            }
+
+            // Focus address bar: Ctrl/Cmd + L
+            if (ctrlOrCmd && (e.key === "l" || e.key === "L")) {
+                e.preventDefault();
+                const urlInput = document.querySelector(".url-input");
+                if (urlInput) {
+                    urlInput.focus();
+                    urlInput.select();
+                }
+                return;
+            }
+
+            // Reload: Ctrl/Cmd + R
+            if (ctrlOrCmd && (e.key === "r" || e.key === "R")) {
+                e.preventDefault();
+                if (window.BiB && window.BiB.Navigation) {
+                    window.BiB.Navigation.reload();
+                }
+                return;
+            }
+
+            // Bookmark current page: Ctrl/Cmd + D
+            if (ctrlOrCmd && (e.key === "d" || e.key === "D")) {
+                e.preventDefault();
+                if (window.BiB && window.BiB.Bookmarks && window.BiB.Tabs) {
+                    const activeTab = window.BiB.Tabs.getActiveTab();
+                    if (activeTab) {
+                        window.BiB.Bookmarks.toggleBookmark(activeTab);
+                    }
+                }
+                return;
+            }
+
+            // Zoom in / Zoom out / Reset
+            if (ctrlOrCmd && (e.key === "=" || e.key === "+")) {
+                e.preventDefault();
+                window.dispatchEvent(new CustomEvent("bib:zoom", { detail: { delta: 10 } }));
+                return;
+            }
+            if (ctrlOrCmd && (e.key === "-" || e.key === "_")) {
+                e.preventDefault();
+                window.dispatchEvent(new CustomEvent("bib:zoom", { detail: { delta: -10 } }));
+                return;
+            }
+            if (ctrlOrCmd && e.key === "0") {
+                e.preventDefault();
+                window.dispatchEvent(new CustomEvent("bib:zoom-reset"));
+                return;
+            }
+
+            // Back: Alt + Left
+            if (e.altKey && e.key === "ArrowLeft") {
+                e.preventDefault();
+                if (window.BiB && window.BiB.Navigation) {
+                    window.BiB.Navigation.back();
+                }
+                return;
+            }
+
+            // Forward: Alt + Right
+            if (e.altKey && e.key === "ArrowRight") {
+                e.preventDefault();
+                if (window.BiB && window.BiB.Navigation) {
+                    window.BiB.Navigation.forward();
+                }
+                return;
+            }
         }
 
-        // Alt + ArrowLeft: Navigate back
-        if (e.altKey && e.key === 'ArrowLeft') {
-            e.preventDefault();
-            if (window.navigationEngine) {
-                window.navigationEngine.back();
+        checkKonami(key) {
+            const target = this.konamiCode[this.konamiIndex];
+            if (key.toLowerCase() === target.toLowerCase()) {
+                this.konamiIndex++;
+                if (this.konamiIndex === this.konamiCode.length) {
+                    this.konamiIndex = 0;
+                    this.triggerKonamiEasterEgg();
+                }
+            } else {
+                this.konamiIndex = 0;
             }
-            return;
         }
 
-        // Alt + ArrowRight: Navigate forward
-        if (e.altKey && e.key === 'ArrowRight') {
-            e.preventDefault();
-            if (window.navigationEngine) {
-                window.navigationEngine.forward();
+        triggerKonamiEasterEgg() {
+            if (window.BiB && window.BiB.Notifications) {
+                window.BiB.Notifications.show("Konami Code Accepted! Unlocking Secret Chamber...", "success", "game", 4000);
             }
-            return;
+            if (window.BiB && window.BiB.Tabs) {
+                window.BiB.Tabs.createTab("bib://secret");
+            }
         }
     }
 
-    checkKonami(key) {
-        const expected = this.konamiCode[this.konamiProgress];
-        if (key.toLowerCase() === expected.toLowerCase()) {
-            this.konamiProgress++;
-            if (this.konamiProgress === this.konamiCode.length) {
-                this.konamiProgress = 0;
-                this.triggerEasterEgg();
-            }
-        } else {
-            this.konamiProgress = 0;
-        }
-    }
-
-    triggerEasterEgg() {
-        if (window.notificationManager) {
-            window.notificationManager.show('🎮 Konami Code Activated! Welcome to Cyber Mode & Secret Vault!', 'success', '👾', 4000);
-        }
-        if (window.themeManager) {
-            window.themeManager.setTheme('cyber');
-        }
-        if (window.tabManager) {
-            window.tabManager.createTab('bib://secret');
-        }
-    }
-}
-
-// Export singleton instance
-window.keyboardManager = new KeyboardManager();
+    window.BiB = window.BiB || {};
+    window.BiB.Keyboard = new KeyboardManager();
+})(window);

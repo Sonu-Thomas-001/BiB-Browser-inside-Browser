@@ -4,7 +4,13 @@
 
 > **A tiny browser living inside your browser.**
 
-[Live Demo](https://sonu-thomas-001.github.io/BiB-Browser-inside-Browser/) • [GitHub Repository](https://github.com/Sonu-Thomas-001/BiB-Browser-inside-Browser)
+🌐 **[Live Demo — Try BiB in your Browser](https://sonu-thomas-001.github.io/BiB-Browser-inside-Browser/)** • [GitHub Repository](https://github.com/Sonu-Thomas-001/BiB-Browser-inside-Browser)
+
+---
+
+<p align="center">
+  <img src="./img/preview-page.png" alt="BiB — Browser inside Browser Preview" width="100%" style="border-radius: 12px; box-shadow: 0 12px 32px rgba(0,0,0,0.12);">
+</p>
 
 ---
 
@@ -221,7 +227,7 @@ Open `http://localhost:8080/index.html` in any modern web browser.
    ```
 2. Navigate to **Settings** → **Pages** in your GitHub repository.
 3. Select `main` branch with root `/` folder and click **Save**.
-4. Your installation will be live on GitHub Pages immediately.
+4. Your installation is live at: **[https://sonu-thomas-001.github.io/BiB-Browser-inside-Browser/](https://sonu-thomas-001.github.io/BiB-Browser-inside-Browser/)**
 
 ---
 

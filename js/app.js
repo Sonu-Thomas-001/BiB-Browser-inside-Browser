@@ -22,11 +22,18 @@ document.addEventListener("DOMContentLoaded", () => {
         window.BiB.Browser.init();
     }
 
-    // 4. Create Initial Tabs
+    // 4. Create Initial Tabs / Restore Previous Session
     if (window.BiB && window.BiB.Tabs) {
-        window.BiB.Tabs.createTab("bib://home", true, false, "Projects");
-        window.BiB.Tabs.createTab("bib://welcome", false, false, "Work");
-        window.BiB.Tabs.createTab("bib://developer", false, false, "Work");
+        const shouldRestore = window.BiB.Settings ? window.BiB.Settings.get("restoreSession") : true;
+        const savedSession = shouldRestore && window.BiB.Storage ? window.BiB.Storage.get("bib_session", null) : null;
+
+        if (savedSession && savedSession.tabs && savedSession.tabs.length > 1) {
+            window.BiB.Tabs.restoreSession(savedSession);
+        } else {
+            window.BiB.Tabs.createTab("bib://home", true, false, "Projects");
+            window.BiB.Tabs.createTab("bib://welcome", false, false, "Work");
+            window.BiB.Tabs.createTab("bib://developer", false, false, "Work");
+        }
     }
 
     // 5. Mobile Bottom Navigation Listeners

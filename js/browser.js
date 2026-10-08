@@ -24,6 +24,7 @@
             this.bindFindInPage();
             this.bindBookmarkBar();
             this.bindNetworkListeners();
+            this.bindLinkHover();
             this.startLiveClock();
             this.initBattery();
 
@@ -121,6 +122,48 @@
                     }
                 });
             }
+
+            const splitBtn = document.querySelector(".split-btn");
+            if (splitBtn) {
+                splitBtn.addEventListener("click", () => {
+                    if (window.BiB && window.BiB.SplitView) {
+                        window.BiB.SplitView.toggle();
+                    }
+                });
+            }
+
+            const commandBtn = document.querySelector(".command-btn");
+            if (commandBtn) {
+                commandBtn.addEventListener("click", () => {
+                    if (window.BiB && window.BiB.Commands) {
+                        window.BiB.Commands.togglePalette();
+                    }
+                });
+            }
+        }
+
+        /* Status Bar Link Hover Preview (Prompt #79, #80) */
+        bindLinkHover() {
+            const statusPill = document.querySelector("#linkHoverStatus");
+            if (!statusPill) return;
+
+            document.addEventListener("mouseover", (e) => {
+                const link = e.target.closest("a");
+                if (link) {
+                    const dest = link.getAttribute("data-url") || link.getAttribute("href");
+                    if (dest && dest !== "#") {
+                        statusPill.textContent = dest;
+                        statusPill.classList.add("is-visible");
+                    }
+                }
+            });
+
+            document.addEventListener("mouseout", (e) => {
+                const link = e.target.closest("a");
+                if (link) {
+                    statusPill.classList.remove("is-visible");
+                }
+            });
         }
 
         /* Omnibox Autocomplete Dropdown */

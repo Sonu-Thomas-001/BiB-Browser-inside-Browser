@@ -6,7 +6,7 @@
 "use strict";
 
 (function (window) {
-    const DB_NAME = "BiB_Database_v2";
+    const DB_NAME = "BiB_Database_v3";
     const DB_VERSION = 1;
 
     class IndexedDBManager {
@@ -18,7 +18,10 @@
                 history: [],
                 bookmarks: [],
                 downloads: [],
-                tabSnapshots: []
+                tabSnapshots: [],
+                readingList: [],
+                sessions: [],
+                windows: []
             };
         }
 
@@ -57,6 +60,23 @@
                     if (!db.objectStoreNames.contains("tabSnapshots")) {
                         const snapStore = db.createObjectStore("tabSnapshots", { keyPath: "id" });
                         snapStore.createIndex("timestamp", "timestamp", { unique: false });
+                    }
+
+                    // Reading list store
+                    if (!db.objectStoreNames.contains("readingList")) {
+                        const rlStore = db.createObjectStore("readingList", { keyPath: "id" });
+                        rlStore.createIndex("timestamp", "timestamp", { unique: false });
+                        rlStore.createIndex("url", "url", { unique: false });
+                    }
+
+                    // Sessions store
+                    if (!db.objectStoreNames.contains("sessions")) {
+                        db.createObjectStore("sessions", { keyPath: "id" });
+                    }
+
+                    // Floating Windows store
+                    if (!db.objectStoreNames.contains("windows")) {
+                        db.createObjectStore("windows", { keyPath: "id" });
                     }
                 };
 

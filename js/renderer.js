@@ -31,6 +31,14 @@
                 if (window.BiB && window.BiB.DeveloperTools) {
                     window.BiB.DeveloperTools.init(container);
                 }
+            } else if (url === "bib://diagnostics") {
+                container.innerHTML = this.getDiagnosticsPage();
+            } else if (url === "bib://experiments") {
+                container.innerHTML = this.getExperimentsPage();
+                this.bindExperimentsPage(container);
+            } else if (url === "bib://reading-list") {
+                container.innerHTML = await this.getReadingListPage();
+                this.bindReadingListPage(container);
             } else if (url === "bib://history") {
                 container.innerHTML = await this.getHistoryPage();
                 this.bindHistoryPage(container);
@@ -51,6 +59,7 @@
                 }
             } else if (url === "bib://privacy") {
                 container.innerHTML = this.getPrivacyPage();
+                this.bindPrivacyPage(container);
             } else if (url === "bib://performance") {
                 container.innerHTML = await this.getPerformancePage();
             } else if (url === "bib://secret") {
@@ -61,9 +70,14 @@
                 const q = params.get("q") || "";
                 container.innerHTML = this.getSearchPage(q);
                 this.bindSearchPage(container);
+            } else if (url.startsWith("file://local/")) {
+                if (window.BiB && window.BiB.FileViewer) {
+                    window.BiB.FileViewer.render(tab.url, container);
+                }
             } else if (url.startsWith("https://") || url.startsWith("http://")) {
-                // Attempt safe iframe embedding with graceful fallback
-                container.innerHTML = this.getIframeEmbed(tab.url);
+                if (window.BiB && window.BiB.WebView) {
+                    window.BiB.WebView.load(tab.url, container);
+                }
             } else {
                 container.innerHTML = this.get404Page(tab.url);
                 this.bind404Page(container);
@@ -259,11 +273,12 @@
                         <button class="dt-tab-btn" data-panel="network">Network</button>
                         <button class="dt-tab-btn" data-panel="storage">Storage</button>
                         <button class="dt-tab-btn" data-panel="performance">Performance</button>
+                        <button class="dt-tab-btn" data-panel="worker">Web Worker</button>
                     </div>
 
                     <div class="dt-panel" id="dtPanelConsole">
                         <div class="terminal-box" id="terminalLogs">
-                            <div class="terminal-line info">[BiB 2.0] Developer Console ready.</div>
+                            <div class="terminal-line info">[BiB 3.0] Developer Console ready.</div>
                             <div class="terminal-line info">Type "help" to see available commands.</div>
                         </div>
                         <div class="terminal-prompt-row">
@@ -317,6 +332,19 @@
                                 <div style="font-size:22px;font-weight:700;color:var(--color-text);margin-top:4px;">24ms</div>
                             </div>
                         </div>
+                    </div>
+
+                    <div class="dt-panel" id="dtPanelWorker" style="display:none;padding:16px;">
+                        <div style="margin-bottom:12px;">
+                            <h3 style="font-size:15px;font-weight:600;margin-bottom:4px;">Real Background Web Worker</h3>
+                            <p style="font-size:12px;color:var(--color-text-secondary);">Calculates large primes in a detached background thread without blocking main UI rendering.</p>
+                        </div>
+                        <div style="display:flex;gap:12px;align-items:center;margin-bottom:16px;">
+                            <button class="btn btn-primary" id="runWorkerTaskBtn">Compute 10,000,000 Primes</button>
+                            <span id="workerStatusBadge" class="diagnostics-badge" style="background:var(--color-surface-secondary);color:var(--color-text-tertiary);">Idle</span>
+                            <span id="workerDuration" style="font-size:12px;font-family:var(--font-mono);color:var(--color-text-secondary);"></span>
+                        </div>
+                        <pre id="workerResultBox" style="background:var(--color-surface-secondary);padding:12px;border-radius:var(--radius-sm);font-family:var(--font-mono);font-size:12px;color:var(--color-text);min-height:80px;white-space:pre-wrap;">Ready to test background thread.</pre>
                     </div>
                 </div>
             `;
@@ -746,17 +774,73 @@
 
         /* Reader Mode */
         getReaderMode(tab) {
+            const u = window.BiB.Utils;
+            const prefs = window.BiB.Reader ? window.BiB.Reader.prefs : { theme: "white", fontSize: 18, width: 720, fontFamily: "sans" };
+
             return `
-                <div class="reader-container">
-                    <h1 class="reader-headline">${window.BiB.Utils.escapeHtml(tab.title || "Article")}</h1>
-                    <div class="reader-byline">Safari Reader Mode • Clean Typography • ${window.BiB.Utils.escapeHtml(tab.url)}</div>
-                    <div class="reader-body">
-                        <p>Welcome to Reader Mode. By stripping navigation chrome, ads, and extraneous layout grids, Reader provides a comfortable, high-contrast reading experience reminiscent of Apple Safari.</p>
-                        <p>Typography and line height are carefully calibrated for reading comfort, utilizing serif body text and generous paragraph margins.</p>
-                        <p>Click the Reader button in the address bar anytime to toggle back to standard view.</p>
+                <div class="reader-view-container" data-reader-theme="${prefs.theme}" data-reader-font="${prefs.fontFamily}" style="--reader-font-size:${prefs.fontSize}px; --reader-max-width:${prefs.width}px;">
+                    <!-- Floating Reader Styling Toolbar (Aa) -->
+                    <div class="reader-toolbar-floating">
+                        <div class="reader-control-group">
+                            <button class="reader-font-toggle ${prefs.fontFamily === 'sans' ? 'is-active' : ''}" data-font="sans">Sans</button>
+                            <button class="reader-font-toggle ${prefs.fontFamily === 'serif' ? 'is-active' : ''}" data-font="serif">Serif</button>
+                            <button class="reader-font-toggle ${prefs.fontFamily === 'mono' ? 'is-active' : ''}" data-font="mono">Mono</button>
+                        </div>
+                        <div class="reader-control-group">
+                            <button class="btn-icon" id="btnReaderFontSmaller" title="Decrease size">A−</button>
+                            <span style="font-size:12px;font-weight:600;min-width:24px;text-align:center;">${prefs.fontSize}</span>
+                            <button class="btn-icon" id="btnReaderFontBigger" title="Increase size">A+</button>
+                        </div>
+                        <div class="reader-control-group">
+                            <button class="reader-theme-dot theme-white ${prefs.theme === 'white' ? 'is-active' : ''}" data-theme="white" title="White"></button>
+                            <button class="reader-theme-dot theme-sepia ${prefs.theme === 'sepia' ? 'is-active' : ''}" data-theme="sepia" title="Sepia"></button>
+                            <button class="reader-theme-dot theme-dark ${prefs.theme === 'dark' ? 'is-active' : ''}" data-theme="dark" title="Dark"></button>
+                            <button class="reader-theme-dot theme-black ${prefs.theme === 'black' ? 'is-active' : ''}" data-theme="black" title="OLED Black"></button>
+                        </div>
+                        <button class="btn-icon" id="btnExitReader" title="Exit Reader View">${u.getIcon("close", "icon", 14)}</button>
                     </div>
+
+                    <article class="reader-article">
+                        <header class="reader-header">
+                            <h1 class="reader-headline">${u.escapeHtml(tab.title || "Reading View")}</h1>
+                            <div class="reader-byline">
+                                <span>Reader View</span>
+                                <span>•</span>
+                                <span>${u.escapeHtml(tab.url)}</span>
+                            </div>
+                        </header>
+                        <div class="reader-body">
+                            <p>Reader Mode transforms web pages into a pure, distraction-free reading sanctuary inspired by Safari. Extraneous navigation chrome, banner grids, and sidebars are stripped away, prioritizing comfortable typography, fluid column widths, and generous line spacing.</p>
+                            <p>You can adjust font families (System Sans, Georgia Serif, or SF Mono), text sizing, and color themes (White, Warm Sepia, Dark Charcoal, or Pitch Black) using the floating control pill above.</p>
+                            <p>All reader preferences are automatically preserved across your sessions.</p>
+                        </div>
+                    </article>
                 </div>
             `;
+        }
+
+        bindReaderMode(container) {
+            container.querySelectorAll("[data-font]").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    const f = btn.getAttribute("data-font");
+                    if (window.BiB.Reader) window.BiB.Reader.setFontFamily(f);
+                });
+            });
+
+            container.querySelectorAll("[data-theme]").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    const t = btn.getAttribute("data-theme");
+                    if (window.BiB.Reader) window.BiB.Reader.setTheme(t);
+                });
+            });
+
+            const btnSmaller = container.querySelector("#btnReaderFontSmaller");
+            const btnBigger = container.querySelector("#btnReaderFontBigger");
+            const btnExit = container.querySelector("#btnExitReader");
+
+            if (btnSmaller) btnSmaller.onclick = () => window.BiB.Reader && window.BiB.Reader.setFontSize(-1);
+            if (btnBigger) btnBigger.onclick = () => window.BiB.Reader && window.BiB.Reader.setFontSize(1);
+            if (btnExit) btnExit.onclick = () => window.BiB.Reader && window.BiB.Reader.toggle();
         }
 
         /* Iframe Embedder with Safe Fallback */
@@ -845,22 +929,280 @@
             if (btnBack) btnBack.addEventListener("click", () => window.BiB.Navigation.back());
         }
 
-        /* Privacy Page */
-        getPrivacyPage() {
+        /* Browser Diagnostics Page (bib://diagnostics) */
+        getDiagnosticsPage() {
+            const apis = [
+                { name: "Clipboard API", check: "clipboard" in navigator, desc: "Asynchronous system clipboard read & write" },
+                { name: "Web Share API", check: "share" in navigator, desc: "Native OS share sheet integration" },
+                { name: "Fullscreen API", check: "requestFullscreen" in document.documentElement, desc: "Hardware fullscreen display" },
+                { name: "IndexedDB API", check: "indexedDB" in window, desc: "High-performance structured client-side database" },
+                { name: "Service Worker API", check: "serviceWorker" in navigator, desc: "Background caching & Progressive Web App capability" },
+                { name: "Web Workers API", check: "Worker" in window, desc: "Multi-threaded CPU computation off main thread" },
+                { name: "WebGL GPU Acceleration", check: !!window.WebGLRenderingContext, desc: "Hardware-accelerated 2D/3D canvas rendering" },
+                { name: "WebRTC Data / Media", check: "RTCPeerConnection" in window, desc: "Peer-to-peer real-time communication" },
+                { name: "Storage Quota API", check: "storage" in navigator, desc: "Client-side disk persistence management" },
+                { name: "Device Battery API", check: "getBattery" in navigator, desc: "Hardware battery level & charging state" },
+                { name: "Network Connection API", check: "connection" in navigator, desc: "Cellular, Wi-Fi, and downlink metrics" }
+            ];
+
+            const isDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+            const isReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
             return `
-                <div class="page-wrapper" style="max-width:680px;">
+                <div class="page-wrapper">
                     <div class="page-header">
-                        <h1 class="page-title">Privacy & Local Storage</h1>
-                        <p class="page-subtitle">BiB does not transmit your personal data to remote servers.</p>
+                        <h1 class="page-title">Browser Diagnostics</h1>
+                        <p class="page-subtitle">Real-time inspection of your host browser's Web Platform capabilities and hardware APIs.</p>
                     </div>
 
-                    <div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-6);font-size:13.5px;color:var(--color-text-secondary);line-height:1.6;">
-                        <p style="margin-bottom:12px;">All browsing history, saved bookmarks, downloads records, and custom settings remain exclusively inside your browser's local sandbox (IndexedDB and localStorage).</p>
-                        <p style="margin-bottom:12px;">You can export or erase this data anytime via the Settings or History panels.</p>
-                        <p>No telemetry, no tracking cookies, and zero external server dependencies.</p>
+                    <div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-6);margin-bottom:var(--space-8);box-shadow:var(--shadow-card);">
+                        <h3 style="font-size:16px;font-weight:600;margin-bottom:14px;">Web Platform API Support</h3>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));gap:12px;">
+                            ${apis.map(api => `
+                                <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--color-surface-secondary);border:1px solid var(--color-border);border-radius:var(--radius-md);">
+                                    <div>
+                                        <div style="font-size:13px;font-weight:600;color:var(--color-text);">${api.name}</div>
+                                        <div style="font-size:11px;color:var(--color-text-tertiary);">${api.desc}</div>
+                                    </div>
+                                    <span class="diag-status-pill ${api.check ? 'is-supported' : 'is-unsupported'}">
+                                        ${api.check ? "Supported" : "Unavailable"}
+                                    </span>
+                                </div>
+                            `).join("")}
+                        </div>
+                    </div>
+
+                    <div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-6);box-shadow:var(--shadow-card);">
+                        <h3 style="font-size:16px;font-weight:600;margin-bottom:14px;">Hardware & Runtime Environment</h3>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:14px;font-size:13px;">
+                            <div><span style="color:var(--color-text-secondary);">Screen Resolution:</span> <strong>${window.screen.width} × ${window.screen.height}</strong></div>
+                            <div><span style="color:var(--color-text-secondary);">Device Pixel Ratio:</span> <strong>${window.devicePixelRatio}x</strong></div>
+                            <div><span style="color:var(--color-text-secondary);">CPU Cores:</span> <strong>${navigator.hardwareConcurrency || "N/A"}</strong></div>
+                            <div><span style="color:var(--color-text-secondary);">System Color Scheme:</span> <strong>${isDark ? "Dark" : "Light"}</strong></div>
+                            <div><span style="color:var(--color-text-secondary);">Reduced Motion:</span> <strong>${isReducedMotion ? "Enabled" : "Disabled"}</strong></div>
+                            <div><span style="color:var(--color-text-secondary);">Network State:</span> <strong>${navigator.onLine ? "Online" : "Offline"}</strong></div>
+                            <div><span style="color:var(--color-text-secondary);">BiB Version:</span> <strong>3.0.0 (Ultimate)</strong></div>
+                        </div>
                     </div>
                 </div>
             `;
+        }
+
+        /* Browser Experiments Page (bib://experiments) */
+        getExperimentsPage() {
+            const u = window.BiB.Utils;
+            const flags = window.BiB.FeatureFlags ? window.BiB.FeatureFlags.getAll() : [];
+
+            return `
+                <div class="page-wrapper" style="max-width:760px;">
+                    <div class="page-header">
+                        <div style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:var(--color-accent-subtle);border-radius:var(--radius-full);color:var(--color-accent);font-size:11.5px;font-weight:600;margin-bottom:8px;">
+                            ${u.getIcon("sparkles", "icon", 13)}
+                            <span>Experimental Features & Flags</span>
+                        </div>
+                        <h1 class="page-title">BiB Labs</h1>
+                        <p class="page-subtitle">Test in-development browser features, visual treatments, and experimental rendering flags.</p>
+                    </div>
+
+                    <div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-card);">
+                        ${flags.map(flag => `
+                            <div class="experiment-row" style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--color-border-subtle);">
+                                <div style="max-width:480px;">
+                                    <div style="font-size:14px;font-weight:600;color:var(--color-text);">${u.escapeHtml(flag.title)}</div>
+                                    <div style="font-size:12.5px;color:var(--color-text-secondary);margin-top:2px;">${u.escapeHtml(flag.desc)}</div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" data-flag-id="${flag.id}" ${flag.enabled ? "checked" : ""}>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        `).join("")}
+                    </div>
+                </div>
+            `;
+        }
+
+        bindExperimentsPage(container) {
+            container.querySelectorAll("input[data-flag-id]").forEach(input => {
+                input.addEventListener("change", (e) => {
+                    const flagId = input.getAttribute("data-flag-id");
+                    if (window.BiB.FeatureFlags) {
+                        window.BiB.FeatureFlags.set(flagId, e.target.checked);
+                        if (window.BiB.Notifications) {
+                            window.BiB.Notifications.show(`Updated experiment flag: ${flagId}`, "info", "sparkles");
+                        }
+                    }
+                });
+            });
+        }
+
+        /* Reading List Page (bib://reading-list) */
+        async getReadingListPage() {
+            const u = window.BiB.Utils;
+            const items = window.BiB.ReadingList ? await window.BiB.ReadingList.getAll() : [];
+
+            return `
+                <div class="page-wrapper" style="max-width:760px;">
+                    <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;">
+                        <div>
+                            <h1 class="page-title">Reading List</h1>
+                            <p class="page-subtitle">${items.length} saved articles for focused reading.</p>
+                        </div>
+                        <button class="btn btn-secondary" onclick="window.BiB.ReadingList.addCurrentPage()">
+                            ${u.getIcon("plus", "icon", 14)}
+                            <span>Save Current Page</span>
+                        </button>
+                    </div>
+
+                    ${items.length === 0 ? `
+                        <div style="text-align:center;padding:60px 20px;background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);">
+                            <span style="display:inline-block;margin-bottom:12px;color:var(--color-text-tertiary);">${u.getIcon("reading-list", "icon", 36)}</span>
+                            <h3 style="font-size:16px;font-weight:600;margin-bottom:4px;">No Articles in Reading List</h3>
+                            <p style="font-size:13px;color:var(--color-text-secondary);max-width:360px;margin:0 auto 16px;">Save pages from the address bar or Command Palette (⌥D) to read them offline later.</p>
+                        </div>
+                    ` : `
+                        <div class="reading-list-items" style="display:flex;flex-direction:column;gap:10px;">
+                            ${items.map(item => `
+                                <div class="reading-item-card ${item.isRead ? 'is-read' : ''}" data-item-id="${item.id}" style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-md);box-shadow:var(--shadow-sm);">
+                                    <div style="cursor:pointer;flex:1;" data-nav="${item.url}">
+                                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                                            <span style="display:inline-flex;align-items:center;">${u.getIcon(item.favicon || "reading-list", "icon", 15)}</span>
+                                            <span style="font-size:14px;font-weight:600;color:var(--color-text);">${u.escapeHtml(item.title)}</span>
+                                            ${!item.isRead ? '<span style="font-size:10px;font-weight:700;padding:1px 6px;background:var(--color-accent-subtle);color:var(--color-accent);border-radius:var(--radius-full);">UNREAD</span>' : ''}
+                                        </div>
+                                        <div style="font-size:12px;color:var(--color-text-tertiary);">${u.escapeHtml(item.url)} • ${u.formatDate(item.timestamp)}</div>
+                                    </div>
+                                    <div style="display:flex;align-items:center;gap:6px;">
+                                        <button class="btn-icon rl-toggle-read" title="${item.isRead ? 'Mark Unread' : 'Mark Read'}">${u.getIcon("check", "icon", 14)}</button>
+                                        <button class="btn-icon rl-remove" title="Remove">${u.getIcon("trash", "icon", 14)}</button>
+                                    </div>
+                                </div>
+                            `).join("")}
+                        </div>
+                    `}
+                </div>
+            `;
+        }
+
+        bindReadingListPage(container) {
+            container.querySelectorAll("[data-nav]").forEach(el => {
+                el.addEventListener("click", () => {
+                    const url = el.getAttribute("data-nav");
+                    if (url) window.BiB.Navigation.navigate(url);
+                });
+            });
+
+            container.querySelectorAll(".rl-toggle-read").forEach(btn => {
+                btn.addEventListener("click", async (e) => {
+                    e.stopPropagation();
+                    const card = btn.closest(".reading-item-card");
+                    const id = card ? card.getAttribute("data-item-id") : null;
+                    if (id && window.BiB.ReadingList) {
+                        await window.BiB.ReadingList.toggleRead(id);
+                        window.BiB.Browser.renderCurrentTab();
+                    }
+                });
+            });
+
+            container.querySelectorAll(".rl-remove").forEach(btn => {
+                btn.addEventListener("click", async (e) => {
+                    e.stopPropagation();
+                    const card = btn.closest(".reading-item-card");
+                    const id = card ? card.getAttribute("data-item-id") : null;
+                    if (id && window.BiB.ReadingList) {
+                        await window.BiB.ReadingList.remove(id);
+                        window.BiB.Browser.renderCurrentTab();
+                    }
+                });
+            });
+        }
+
+        /* Privacy & Data Clearing Page (bib://privacy) */
+        getPrivacyPage() {
+            const u = window.BiB.Utils;
+            return `
+                <div class="page-wrapper" style="max-width:680px;">
+                    <div class="page-header">
+                        <h1 class="page-title">Clear Browsing Data</h1>
+                        <p class="page-subtitle">Selective clearing of BiB's client-side IndexedDB and LocalStorage cache.</p>
+                    </div>
+
+                    <div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-6);margin-bottom:var(--space-6);box-shadow:var(--shadow-card);">
+                        <div style="margin-bottom:20px;">
+                            <label style="display:block;font-size:12.5px;font-weight:600;margin-bottom:6px;color:var(--color-text);">Time range</label>
+                            <select id="privacyTimeRange" style="width:100%;max-width:280px;padding:8px 12px;border:1px solid var(--color-border);border-radius:var(--radius-md);background:var(--color-surface-secondary);color:var(--color-text);font-family:var(--font-sans);font-size:13px;">
+                                <option value="hour">Last hour</option>
+                                <option value="day">Today</option>
+                                <option value="week">Last 7 days</option>
+                                <option value="month">Last 30 days</option>
+                                <option value="all" selected>All time</option>
+                            </select>
+                        </div>
+
+                        <div style="display:flex;flex-direction:column;gap:14px;font-size:13.5px;color:var(--color-text);margin-bottom:24px;">
+                            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                                <input type="checkbox" id="chkClearHistory" checked style="accent-color:var(--color-accent);width:16px;height:16px;">
+                                <span>Browsing History & Omnibox Recents</span>
+                            </label>
+                            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                                <input type="checkbox" id="chkClearBookmarks" style="accent-color:var(--color-accent);width:16px;height:16px;">
+                                <span>Bookmarks & Saved Folders</span>
+                            </label>
+                            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                                <input type="checkbox" id="chkClearReadingList" checked style="accent-color:var(--color-accent);width:16px;height:16px;">
+                                <span>Reading List Articles</span>
+                            </label>
+                            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                                <input type="checkbox" id="chkClearDownloads" checked style="accent-color:var(--color-accent);width:16px;height:16px;">
+                                <span>Downloads Log & Blobs</span>
+                            </label>
+                            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                                <input type="checkbox" id="chkClearSitePrefs" checked style="accent-color:var(--color-accent);width:16px;height:16px;">
+                                <span>Site Preferences & Feature Flags</span>
+                            </label>
+                        </div>
+
+                        <div style="display:flex;justify-content:flex-end;gap:10px;">
+                            <button class="btn btn-secondary" onclick="window.BiB.Navigation.back()">Cancel</button>
+                            <button class="btn btn-danger" id="btnExecuteClearData">Clear Data Now</button>
+                        </div>
+                    </div>
+
+                    <div style="background:var(--color-surface-secondary);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:14px 18px;font-size:12.5px;color:var(--color-text-secondary);display:flex;align-items:flex-start;gap:10px;">
+                        <span style="color:var(--color-accent);margin-top:2px;">${u.getIcon("info", "icon", 16)}</span>
+                        <span>
+                            <strong>Note on Web Security Boundaries:</strong> This action clears data stored inside BiB's local application database (IndexedDB/localStorage). It does not alter your host desktop browser's native browsing history or cookies.
+                        </span>
+                    </div>
+                </div>
+            `;
+        }
+
+        bindPrivacyPage(container) {
+            const btnClear = container.querySelector("#btnExecuteClearData");
+            if (!btnClear) return;
+
+            btnClear.addEventListener("click", async () => {
+                const clearHist = container.querySelector("#chkClearHistory")?.checked;
+                const clearBm = container.querySelector("#chkClearBookmarks")?.checked;
+                const clearRl = container.querySelector("#chkClearReadingList")?.checked;
+                const clearDl = container.querySelector("#chkClearDownloads")?.checked;
+                const clearPrefs = container.querySelector("#chkClearSitePrefs")?.checked;
+
+                if (clearHist && window.BiB.IndexedDB) await window.BiB.IndexedDB.clear("history");
+                if (clearBm && window.BiB.IndexedDB) await window.BiB.IndexedDB.clear("bookmarks");
+                if (clearRl && window.BiB.IndexedDB) await window.BiB.IndexedDB.clear("readingList");
+                if (clearDl && window.BiB.IndexedDB) await window.BiB.IndexedDB.clear("downloads");
+                if (clearPrefs && window.BiB.Storage) {
+                    window.BiB.Storage.remove("bib_feature_flags");
+                    window.BiB.Storage.remove("bib_reader_prefs");
+                }
+
+                if (window.BiB.Notifications) {
+                    window.BiB.Notifications.show("Selected browsing data cleared", "success", "check");
+                }
+                setTimeout(() => window.BiB.Navigation.navigate("bib://home"), 600);
+            });
         }
 
         /* Performance Page */

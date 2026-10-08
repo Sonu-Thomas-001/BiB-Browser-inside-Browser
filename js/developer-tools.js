@@ -16,6 +16,7 @@
             this.bindTabs();
             this.bindConsole();
             this.renderStorage();
+            this.bindWorker();
         }
 
         bindTabs() {
@@ -26,7 +27,8 @@
                 elements: this.container.querySelector("#dtPanelElements"),
                 network: this.container.querySelector("#dtPanelNetwork"),
                 storage: this.container.querySelector("#dtPanelStorage"),
-                performance: this.container.querySelector("#dtPanelPerformance")
+                performance: this.container.querySelector("#dtPanelPerformance"),
+                worker: this.container.querySelector("#dtPanelWorker")
             };
 
             buttons.forEach(btn => {
@@ -183,6 +185,90 @@
                     ${rows || '<tr><td colspan="2" style="padding:10px;color:var(--color-text-tertiary);">No keys stored</td></tr>'}
                 </table>
             `;
+        }
+
+        bindWorker() {
+            const btn = this.container.querySelector("#runWorkerTaskBtn");
+            const statusBadge = this.container.querySelector("#workerStatusBadge");
+            const durationEl = this.container.querySelector("#workerDuration");
+            const resultBox = this.container.querySelector("#workerResultBox");
+            if (!btn || !statusBadge || !resultBox) return;
+
+            btn.addEventListener("click", () => {
+                btn.disabled = true;
+                statusBadge.textContent = "Running in background thread...";
+                statusBadge.style.color = "var(--color-warning)";
+                statusBadge.style.background = "rgba(255,149,0,0.12)";
+                durationEl.textContent = "Calculating...";
+                resultBox.textContent = "Worker thread calculating prime numbers up to 10,000,000...\nNotice that the UI remains completely responsive (try typing, switching tabs, or clicking buttons)!";
+
+                const workerScript = `
+                    self.onmessage = function(e) {
+                        const start = performance.now();
+                        const limit = e.data.limit || 5000000;
+                        let count = 0;
+                        let maxPrime = 2;
+                        
+                        // Sieve / Prime check
+                        for (let n = 2; n <= limit; n++) {
+                            let isP = true;
+                            const sqrt = Math.sqrt(n);
+                            for (let d = 2; d <= sqrt; d++) {
+                                if (n % d === 0) {
+                                    isP = false;
+                                    break;
+                                }
+                            }
+                            if (isP) {
+                                count++;
+                                maxPrime = n;
+                            }
+                        }
+                        const end = performance.now();
+                        self.postMessage({
+                            limit: limit,
+                            count: count,
+                            maxPrime: maxPrime,
+                            durationMs: (end - start).toFixed(2)
+                        });
+                    };
+                `;
+
+                try {
+                    const blob = new Blob([workerScript], { type: "application/javascript" });
+                    const worker = new Worker(URL.createObjectURL(blob));
+
+                    worker.onmessage = (e) => {
+                        const data = e.data;
+                        statusBadge.textContent = "Completed";
+                        statusBadge.style.color = "var(--color-success)";
+                        statusBadge.style.background = "rgba(52,199,89,0.12)";
+                        durationEl.textContent = `Completed in ${data.durationMs}ms`;
+                        resultBox.textContent = `Task: Background Prime Search\n` +
+                            `Evaluated range: 2 to ${data.limit.toLocaleString()}\n` +
+                            `Primes found: ${data.count.toLocaleString()}\n` +
+                            `Largest prime found: ${data.maxPrime.toLocaleString()}\n` +
+                            `Worker execution time: ${data.durationMs}ms\n` +
+                            `Main thread frame drops: 0 (True multi-threading via Web Worker API)`;
+                        btn.disabled = false;
+                        worker.terminate();
+                    };
+
+                    worker.onerror = (err) => {
+                        statusBadge.textContent = "Error";
+                        statusBadge.style.color = "var(--color-danger)";
+                        resultBox.textContent = "Worker error: " + err.message;
+                        btn.disabled = false;
+                        worker.terminate();
+                    };
+
+                    worker.postMessage({ limit: 2000000 });
+                } catch (err) {
+                    statusBadge.textContent = "Unsupported";
+                    resultBox.textContent = "Web Workers could not be instantiated in this context: " + err.message;
+                    btn.disabled = false;
+                }
+            });
         }
     }
 

@@ -22,9 +22,70 @@
             const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
             const ctrlOrCmd = isMac ? e.metaKey : e.ctrlKey;
 
-            // Escape: Dismiss overlays, modals, find bar
+            // Escape: Dismiss overlays, modals, find bar, command palette
             if (e.key === "Escape") {
+                if (window.BiB && window.BiB.Commands && window.BiB.Commands.isOpen) {
+                    window.BiB.Commands.closePalette();
+                    return;
+                }
+                if (window.BiB && window.BiB.Tabs && window.BiB.Tabs.closeTabSearch) {
+                    window.BiB.Tabs.closeTabSearch();
+                }
                 window.dispatchEvent(new CustomEvent("bib:close-overlays"));
+                return;
+            }
+
+            // Command Palette: Ctrl/Cmd + K
+            if (ctrlOrCmd && (e.key === "k" || e.key === "K")) {
+                e.preventDefault();
+                if (window.BiB && window.BiB.Commands) {
+                    window.BiB.Commands.togglePalette();
+                }
+                return;
+            }
+
+            // Tab Search: Ctrl/Cmd + Shift + A
+            if (ctrlOrCmd && e.shiftKey && (e.key === "a" || e.key === "A")) {
+                e.preventDefault();
+                if (window.BiB && window.BiB.Tabs && window.BiB.Tabs.openTabSearch) {
+                    window.BiB.Tabs.openTabSearch();
+                }
+                return;
+            }
+
+            // Open Local File: Ctrl/Cmd + O
+            if (ctrlOrCmd && (e.key === "o" || e.key === "O")) {
+                e.preventDefault();
+                if (window.BiB && window.BiB.FileViewer) {
+                    window.BiB.FileViewer.promptOpen();
+                }
+                return;
+            }
+
+            // Split View: Alt + S
+            if (e.altKey && (e.key === "s" || e.key === "S")) {
+                e.preventDefault();
+                if (window.BiB && window.BiB.SplitView) {
+                    window.BiB.SplitView.toggle();
+                }
+                return;
+            }
+
+            // Reader Mode: Alt + R
+            if (e.altKey && (e.key === "r" || e.key === "R")) {
+                e.preventDefault();
+                if (window.BiB && window.BiB.Reader) {
+                    window.BiB.Reader.toggle();
+                }
+                return;
+            }
+
+            // New Mini Floating Window: Ctrl/Cmd + Shift + N
+            if (ctrlOrCmd && e.shiftKey && (e.key === "n" || e.key === "N")) {
+                e.preventDefault();
+                if (window.BiB && window.BiB.WindowManager) {
+                    window.BiB.WindowManager.createWindow("bib://home", "BiB Window");
+                }
                 return;
             }
 

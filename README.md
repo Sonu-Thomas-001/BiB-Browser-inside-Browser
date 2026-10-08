@@ -4,7 +4,7 @@
 
 > **A tiny browser living inside your browser.**
 
-[Live Demo](https://pages.github.com/) • [GitHub Repository](https://github.com/)
+[Live Demo](https://sonu-thomas-001.github.io/BiB-Browser-inside-Browser/) • [GitHub Repository](https://github.com/Sonu-Thomas-001/BiB-Browser-inside-Browser)
 
 ---
 

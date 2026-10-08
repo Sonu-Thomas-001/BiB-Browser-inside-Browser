@@ -46,10 +46,10 @@
     };
 
     const Utils = {
-        getIcon(name, className = "icon") {
+        getIcon(name, className = "icon", size = 18) {
             const svg = ICONS[name] || ICONS["search"];
-            if (!className) return svg;
-            return svg.replace('<svg ', `<svg class="${className}" aria-hidden="true" `);
+            if (!className && !size) return svg;
+            return svg.replace('<svg ', `<svg class="${className}" width="${size}" height="${size}" aria-hidden="true" `);
         },
 
         createElement(tag, className = "", innerHTML = "", attributes = {}) {
